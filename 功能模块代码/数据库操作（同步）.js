@@ -5,10 +5,10 @@
  * @LastEditTime: 2022-01-04 14:27:34
  */
 /**
- * @description: 将数据库查询结果返回数据集，只能执行SEECT语句
+ * @description: 执行SQL语句
  * @param {string} dataSource - 数据源名称
- * @param {string} sqlStr - SQL查询语句
- * @return {*} 数据集数组对象，若查询失败则返回false且弹窗提示
+ * @param {string} sqlStr - SQL语句
+ * @return {*} 若为查询则返回数据集（数组对象），若为增删查则返回true/false，若查询失败则返回false且弹窗提示，控制台打印错误信息
  */
 function toDataSet(dataSource, sqlStr) {
     try {
