@@ -6,10 +6,22 @@
  */
 /**
  * @description 质检任务执行函数，将上一步质检流程存入历史表中，并将结果回传至WMS、ERP、MES内部表中
- * @param {string} taskId 任务编号
- * @param {string} exeCutor - 当前步骤执行人
- * @param {object[object]} privateResultObj - 质检结果私有成员数组对象，根据任务类型需要存入不同的数据，其中质检结果对象需包含result属性用于存放单个质检项的结果0为不合格1为合格
- * @param {string} QCresult - 质检结果 0：不合格 1：合格 若为空则程序根据质检结果私有成员对象中的检测结果自动判定，若为取样任务则填入空值
+ * @param {object[object]} QcTestResult - 质检结果数组对象，格式如下
+ * {
+        taskId: 'QC5255', //任务编号
+        exeCutor: '小米', //当前步骤执行人
+        privateResultObj: [
+            {
+                innerCode: '125545',        //质检项内码
+                test: 'XXXXXX',             //检测项内容
+                upper_limit: 'XXXXXX',      //上限值
+                lower_limit: 'XXXXX',       //下限值
+                ...,
+                result: 1,                  //质检结果
+            }, ...
+        ], //质检结果私有成员数组对象，根据任务类型需要存入不同的数据，其中质检结果对象需包含result属性用于存放单个质检项的结果0为不合格1为合格
+        QCresult: 1, //质检结果 0：不合格 1：合格 若为空则程序根据质检结果私有成员对象中的检测结果自动判定，若为取样任务则填入空值
+    }
  * @return {object} {errorcode: 0, message: ''} errorcode错误代码 0：执行成功 1：执行失败
  */
 function QCtaskExecute(taskId, exeCutor, privateResultObj, QCresult) {
@@ -48,7 +60,7 @@ function QCtaskExecute(taskId, exeCutor, privateResultObj, QCresult) {
         };
         WMS_QCpush(WMSQCData, function (res) {
             var resData = JSON.parse(res);
-            if(resData.Handle_Code != '000') throw resData.Handle_Msg
+            if (resData.Handle_Code != '000') throw resData.Handle_Msg;
         });
     } catch (e) {
         result.errorCode = 1;
