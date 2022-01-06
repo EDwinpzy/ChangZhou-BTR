@@ -14,7 +14,10 @@ function toMap(primaryKey, dataSet) {
     if (primary.length > 0) {
         var map = {};
         dataSet.forEach(function (item) {
-            var key = primaryKey.join('');
+            var key = '';
+            for(var i = 0; i < primaryKey.length; i++){
+                key += item[primaryKey[i]]
+            }
             map[key] = item;
         });
         return map;
