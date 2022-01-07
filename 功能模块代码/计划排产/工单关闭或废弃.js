@@ -7,7 +7,7 @@
 /**
  * @description: 工单关闭/废弃函数，更新工单信息表productOrder_realTime的标志位，并将工单信息表productOrder_realTime、投料实时表put_realTime、收料实时表get_realTime 存如历史表中，并删除实时表中的数据。
  * @param {object[string]} jobID - 制令单号/配比单号（工单号,MES批次号）
- * @param {number} mode - 0：完成后关闭 1：废弃（取消）
+ * @param {number} mode - 0：完成后结单 1：废弃（取消）2：取消结单
  * @return {object} {errorCode: 0, message: ''}
  */
 function CloseProductOrder(jobID, mode) {
