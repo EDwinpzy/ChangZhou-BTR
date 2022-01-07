@@ -7,7 +7,7 @@
 /**
  * @description 对数据集进行筛选
  * @param {object} dataSet 数据集
- * @param {object[object]} filter - 筛选条件[{field: 字段名, value: 字段值}, ...]
+ * @param {object[object]} filter - 筛选条件[{field: 字段名, value: [字段值],...}, ...]
  * @return {object} 筛选后的数组对象
  */
 function dataFilter(dataSet, filter) {
