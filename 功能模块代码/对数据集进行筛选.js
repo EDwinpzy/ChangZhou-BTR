@@ -2,12 +2,12 @@
  * @Author: EDwin
  * @Date: 2021-12-14 10:42:26
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2022-01-04 18:27:38
+ * @LastEditTime: 2022-01-10 16:58:35
  */
 /**
  * @description 对数据集进行筛选
  * @param {object} dataSet 数据集
- * @param {object[object]} filter - 筛选条件[{field: 字段名, value: [字段值],...}, ...]
+ * @param {object[object]} filter - 筛选条件[{field: 字段名, value: '字段值', match: '='}, ...]
  * @return {object} 筛选后的数组对象
  */
 function dataFilter(dataSet, filter) {

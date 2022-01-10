@@ -1,18 +1,12 @@
-async function a () {
-    function promiseClick() {
-        return new Promise(async function (resolve, reject) {
-            var a = 2;
-            //做一些异步操作
-            setTimeout(function () {
-                resolve(a);
-            }, 4000);
-        });
-    }
-    var p = await promiseClick()
-        p.then(function (data) {
-        return data;
-    });
+/*
+ * @Author: EDwin
+ * @Date: 2022-01-10 13:25:09
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2022-01-10 16:17:46
+ */
+var a =
+{
+    GYS: '供应商',
+    GYS_PCH: '供应商批次',
+    GYS_DM: '供应商代码',
 }
-console.log(1);
-console.log(a)
-console.log(3)
