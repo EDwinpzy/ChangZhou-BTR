@@ -2,11 +2,13 @@
  * @Author: EDwin
  * @Date: 2021-12-29 17:40:18
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2022-01-10 14:11:29
+ * @LastEditTime: 2022-01-11 17:07:29
  */
 /**
  * @description: 按控件内容筛选函数
  * @param {object[object]} OCX - 控件名称及对应的字段名 [{name: 'Combobox1', field: 'taskID', match: '='}, ...] 匹配条件可为 =、!=、<、>、<=、>=、like（模糊查询）
+ *                               若需要对单选框的文本内容进行筛选，则name属性需为 '控件名称_text' 这种形式
+ *                                若需要对单选框的索引进行筛选，则name属性需为 '控件名称_index' 这种形式
  * @param {object[object]} dataSet - 数据集
  * @return {object[object]} 筛选后的数据集
  */
@@ -29,7 +31,11 @@ function OcxFiltering(OCX, dataSet) {
                 obj.value = eval(OCXName).Text;
                 break;
             case 'UIRadioButtonGroup':
-                obj.value = eval(OCXName).SelectedText;
+                if (OCXName.indexOf(text) != -1) {
+                    obj.value = eval(OCXName).SelectedText;
+                } else if (OCXName.indexOf(index) != -1) {
+                    obj.value = eval(OCXName).SelectedIndex;
+                }
                 break;
             case 'DateBox':
                 obj.value = eval(OCXName).Value;
