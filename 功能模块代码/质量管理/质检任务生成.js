@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2022-01-11 16:53:43
+ * @LastEditTime: 2022-01-11 18:47:47
  * @FilePath: \负极二期\功能模块代码\质检任务生成.js
  */
 /**
@@ -36,7 +36,9 @@
                                         line: '产线',
                                         station: '站点',
                                         supplierNumber: '设备名称',
-                                        productCode: '产品代码',
+                                        productCode: '产品代码（成品或半成品）',
+                                        productName: 产品名称
+                                        productDescript: 产品描述
                                    }
                                 }, ...]    
  * @param {object} rule - 质检规则 1：全检 2：首检  {type: 2, intervalNum：10, integer：1}质检规则为首检，每10个小批次取第一个小批次进行质检，向下取整 type：质检规则，intervalNum：取样间隔，integer：取整规则（1为向下取整，2为向上取整）  {type: 1}质检规则为全检
@@ -51,26 +53,53 @@ function QCtaskGenrate(taskType, exeCutor, info) {
             message: '',
         };
         var nowData = $Function.GetDataTimeFunc(); //获取任务生成时间
-        QC_testitem = $Function.toDataSet;
+        var QC_testitem = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[2]}`);
+
         /*************************生成质检任务单****************************** */
         var field = []; //字段名数组
+        var field1 = []; //字段名数组
         for (var key in info[0]) {
             field.push(key);
         }
+        for (var key in QC_testitem) {
+            field1.push(key);
+        }
         var sqlStr = `INSERT INTO ${dataBase[0]} (${field.join(',')}, taskid, tasktype) VALUES `;
+        var sqlStr1 = `INSERT INTO ${dataBase[1]} (${field1.join(',')}, taskid) VALUES `;
         info.forEach(function (item) {
+            var taskId = $Function.getID(taskType + 1);
+            //生成质检结果表
+            var stockCode;
+            taskType == 1 ? (stockCode = item.privateTaskObj.stockcode) : (stockCode = item.privateTaskObj.productCode); //获取物料代码
+            var task_testItem = $Function.dataFilter(QC_testitem, { field: 'WLH', value: stockCode, match: '=' });
+            if (task_testItem == false) throw '查询不到物料编号为' + stockCode + '的质检项信息';
+
+            task_testItem.forEach(function (item) {
+                var value1 = [];
+                item.taskid = taskId;
+                for (var key in item) {
+                    value1.push("'" + item[key] + "'");
+                }
+                sqlStr1 += `(${value1.join(',')}),`;
+            });
+
+            //生成质检任务表
             var value = [];
             field.forEach(function (key) {
                 if (key == privateTaskObj) item[key] = JSON.stringify(item[key]); //私有成员对象转换成JSON字符串
                 value.push("'" + item[key] + "'");
-                value.push("'" + $Function.getID(taskType + 1) + "'");
-                value.push("'" + taskType + "'");
             });
+            value.push("'" + taskId + "'");
+            value.push("'" + taskType + "'");
             sqlStr += `(${value.join(',')}),`;
         });
         sqlStr.substring(0, sqlStr.length - 1);
+        sqlStr1.substring(0, sqlStr1.length - 1);
         var res = $Function.toDataSet($System.BTR, sqlStr);
-        if (!res) throw '原材料质检任务生成失败！';
+        var res1 = $Function.toDataSet($System.BTR, sqlStr1);
+        if (!res || !res1) throw '原材料质检任务生成失败！';
+
+
         var taskNum;
         //查询任务次数和ERP批次号
         var res = {};

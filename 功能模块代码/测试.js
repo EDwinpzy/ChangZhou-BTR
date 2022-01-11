@@ -1,1 +1,1 @@
-console.log('a' == 'A')
+var a ={"ID":"customk7c1fd070_1257_4f89_90b3_9137453a4952","name":"Fun_EnableCopy","params":"(arrID)","comment":"开启控件复制功能","code":"\n/********\n * 函数功能：开启画面复制功能\n * 输入参数：需要开启复制功能的控件ID数组\n * 输出参数：无\n * 版本号： 2021-07-12 创建函数\n * *********/\n if (!$(\"
