@@ -1,8 +1,8 @@
 /*
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2022-01-11 18:47:47
+ * @LastEditors: EDwin
+ * @LastEditTime: 2022-01-12 13:47:11
  * @FilePath: \负极二期\功能模块代码\质检任务生成.js
  */
 /**
@@ -41,11 +41,10 @@
                                         productDescript: 产品描述
                                    }
                                 }, ...]    
- * @param {object} rule - 质检规则 1：全检 2：首检  {type: 2, intervalNum：10, integer：1}质检规则为首检，每10个小批次取第一个小批次进行质检，向下取整 type：质检规则，intervalNum：取样间隔，integer：取整规则（1为向下取整，2为向上取整）  {type: 1}质检规则为全检
  * @return {number} {errorCode: 0, message: ''}
  */
 function QCtaskGenrate(taskType, exeCutor, info) {
-    //数据库表完整路径名称(必须包含数据库名称)['质检实时任务表', '质检结果表', '质检项表', '库存批次信息表', 'ERP采购订单接口表']
+    //数据库表完整路径名称(必须包含数据库名称)['质检实时任务表', '质检结果表', '质检项表', '库存批次信息表']
     var dataBase = ['[dbo].[QC_RealTimeTask]', '[dbo].[QC_result]', '[dbo].[QC_testitem]', '[dbo].[storage_batch]'];
     try {
         var result = {
@@ -53,9 +52,10 @@ function QCtaskGenrate(taskType, exeCutor, info) {
             message: '',
         };
         var nowData = $Function.GetDataTimeFunc(); //获取任务生成时间
-        var QC_testitem = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[2]}`);
+        var QC_testitem = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[2]}`); //获取质检项数据集
+        var QC_RealTimeTask = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[0]} WHERE tasktype IN (1, 3 ,5) AND taskstatus = 3`); //获取已完成的质检任务，用于在生成新任务的时候确定当前任务次数
 
-        /*************************生成质检任务单****************************** */
+        /*****************************生成质检任务单****************************** */
         var field = []; //字段名数组
         var field1 = []; //字段名数组
         for (var key in info[0]) {
@@ -64,26 +64,28 @@ function QCtaskGenrate(taskType, exeCutor, info) {
         for (var key in QC_testitem) {
             field1.push(key);
         }
-        var sqlStr = `INSERT INTO ${dataBase[0]} (${field.join(',')}, taskid, tasktype) VALUES `;
+        var sqlStr = `INSERT INTO ${dataBase[0]} (${field.join(',')}, taskid, tasktype, taskNum) VALUES `;
         var sqlStr1 = `INSERT INTO ${dataBase[1]} (${field1.join(',')}, taskid) VALUES `;
         info.forEach(function (item) {
             var taskId = $Function.getID(taskType + 1);
-            //生成质检结果表
-            var stockCode;
-            taskType == 1 ? (stockCode = item.privateTaskObj.stockcode) : (stockCode = item.privateTaskObj.productCode); //获取物料代码
-            var task_testItem = $Function.dataFilter(QC_testitem, { field: 'WLH', value: stockCode, match: '=' });
-            if (task_testItem == false) throw '查询不到物料编号为' + stockCode + '的质检项信息';
+            if (taskType == 1 || taskType == 3 || taskType == 5) {
+                /*************生成质检结果表QC_result***********/
+                var stockCode;
+                taskType == 1 ? (stockCode = item.privateTaskObj.stockcode) : (stockCode = item.privateTaskObj.productCode); //获取物料代码
+                var task_testItem = $Function.dataFilter(QC_testitem, { field: 'WLH', value: stockCode, match: '=' });
+                if (task_testItem == false) throw '查询不到物料编号为' + stockCode + '的质检项信息';
 
-            task_testItem.forEach(function (item) {
-                var value1 = [];
-                item.taskid = taskId;
-                for (var key in item) {
-                    value1.push("'" + item[key] + "'");
-                }
-                sqlStr1 += `(${value1.join(',')}),`;
-            });
+                task_testItem.forEach(function (item) {
+                    var value1 = [];
+                    item.taskid = taskId;
+                    for (var key in item) {
+                        value1.push("'" + item[key] + "'");
+                    }
+                    sqlStr1 += `(${value1.join(',')}),`;
+                });
+            }
 
-            //生成质检任务表
+            /*************生成质检任务表QC_RealTimeTask**************/
             var value = [];
             field.forEach(function (key) {
                 if (key == privateTaskObj) item[key] = JSON.stringify(item[key]); //私有成员对象转换成JSON字符串
@@ -91,6 +93,27 @@ function QCtaskGenrate(taskType, exeCutor, info) {
             });
             value.push("'" + taskId + "'");
             value.push("'" + taskType + "'");
+            var taskNum = 1;
+            //获取该批次已完成的任务记录中当前任务次数最大值，新生成的任务中当前任务次数字段在此基础上加1
+            var batch;
+            if (item.jobIDS != '' || item.jobIDS != undefined) {
+                batch = item.jobIDS;
+            } else if (item.jobID != '' || item.jobID != undefined) {
+                batch = item.jobID;
+            } else if (item.ERPbatch != '' || item.ERPbatch != undefined) {
+                batch = item.ERPbatch;
+            } else {
+                throw '批次信息缺失！';
+            }
+            var arr1 = $Function.dataFilter(QC_RealTimeTask, [{ field: 'jobIDS', value: batch, match: '=' }]);
+            var arr2 = $Function.dataFilter(QC_RealTimeTask, [{ field: 'jobID', value: batch, match: '=' }]);
+            var arr3 = $Function.dataFilter(QC_RealTimeTask, [{ field: 'ERPbatch', value: batch, match: '=' }]);
+            var arr4 = arr1.concat(arr2.concat(arr3));
+            arr4.forEach(function (item) {
+                if (item.taskNum > taskNum) taskNum = item.taskNum; //筛选出当前任务次数最大值
+            });
+            taskNum += 1;
+            value.push(taskNum); //将当前任务次数推入数组中
             sqlStr += `(${value.join(',')}),`;
         });
         sqlStr.substring(0, sqlStr.length - 1);
@@ -98,51 +121,8 @@ function QCtaskGenrate(taskType, exeCutor, info) {
         var res = $Function.toDataSet($System.BTR, sqlStr);
         var res1 = $Function.toDataSet($System.BTR, sqlStr1);
         if (!res || !res1) throw '原材料质检任务生成失败！';
-
-
-        var taskNum;
-        //查询任务次数和ERP批次号
-        var res = {};
-        $Function.toDataSet($System.BTR, `SELECT (SELECT COUNT(smallBatch) FROM '${dataBase[1]}' WHERE taskType = '${taskType}') AS Num, (SELECT ERPbatch FROM '${dataBase[2]}' WHERE BTRbigBatch = '${bigBatch}' OR BTRsmallBatch = '${smallBatch}') AS ERPbatch`);
-        if (res.errorCode != 0) throw '查询质检任务失败！';
-        var data = res.data.records;
-        taskNum = data[0].Num + 1;
-        var sqlStr = `INSERT INTO '${dataBase[0]}' ([taskid], [tasktype], [taskstatus], [starttime], [exeCutor], [smallBatch], [bigBatch], [privateTaskObj], [taskNum], [rule], [ERPbatch]) VALUES `;
-        if (rule.type == 1) {
-            //质检规则为全检，不考虑大批次，对所有输入的小批次生成取样和质检任务
-            sqlStr += `('${taskId}', '${taskType}', 0, '${nowData}', '${exeCutor}', '${smallBatch}', ${bigBatch}, '${JSON.stringify(privateTaskObj)}', '${taskNum}', '${rule.type}', '${res.records[0].ERPbatch}')`;
-            $Function.toDataSet($System.BTR, 1, sqlStr, res);
-            if (res.errorCode != 0) throw '生成质检任务失败！' + sqlStr;
-        } else if (rule.type == 2) {
-            //质检规则为首检，从大批次中按质检规则抽取未质检的小批次，生成质检任务
-            $Function.toDataSet($System.BTR, 1, `SELECT * FROM '${dataBase[2]}' WHERE BTRbigBatch = '${bigBatch}' AND QCresult == '' ORDER BY 包号`, res);
-            if (res.errorCode != 0) throw sqlStr + '执行失败！';
-            //样本数量
-            var sampleNum = res.data.records.length;
-            //样本数量小于待检数量
-            if (sampleNum < rule.content) {
-                return 0;
-            } else {
-                var taskNum;
-                switch (rule.integer) {
-                    //向下取整
-                    case 1:
-                        taskNum = Math.floor(sampleNum / rule.intervalNum);
-                        break;
-                    //向上取整
-                    case 2:
-                        taskNum = Math.ceil(sampleNum / rule.intervalNum);
-                        break;
-                }
-                for (var i = 0; i < taskNum; i++) {
-                    sqlStr += `('${taskId}', '${taskType}', 0, '${nowData}', '${exeCutor}', '${result1.records[rule.intervalNum * i]}', ${bigBatch}, '${privateTaskObj}', '${taskNum}', '${rule.type}'), `;
-                }
-                sqlStr.substring(0, sqlStr.length - 2);
-                $Function.toDataSet($System.BTR, 1, sqlStr, res);
-                if (res.errorCode != 0) throw '生成质检任务失败！' + sqlStr;
-            }
-        }
     } catch (e) {
+        console.log(e)
         result.errorCode = 1;
         result.message = e;
     } finally {
