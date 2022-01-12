@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-12 13:54:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-12 16:54:53
+ * @LastEditTime: 2022-01-12 18:05:59
  */
 /**
  * @description: 根据自动判定标识生成质检结果，在手动输入质检项结果，或接收质检中心传过来的质检项结果后，自动生成质检项结果和质检任务结果。
