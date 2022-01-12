@@ -2,11 +2,11 @@
  * @Author: EDwin
  * @Date: 2021-12-30 08:57:48
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2022-01-04 10:23:53
+ * @LastEditTime: 2022-01-12 10:03:40
  */
 /**
  * @description: 获取各种表单、任务编号 规则：类型 + 日期 + 流水号
- * @param {number} type - 编号类型 1:工单号 2：原材料质检 3：半成品取样 4：半成品质检 5：成品取样 6：成品质检
+ * @param {number} type - 编号类型 1:工单号 2：原材料质检 3：半成品取样 4：半成品质检 5：成品取样 6：成品质检 7: MRB
  * @return {string} id - 单号
  */
 function getID(type) {
