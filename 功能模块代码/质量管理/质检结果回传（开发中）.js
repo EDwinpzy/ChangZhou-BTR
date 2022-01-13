@@ -1,8 +1,8 @@
 /*
  * @Author: EDwin
  * @Date: 2021-12-27 09:40:33
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2022-01-04 16:09:44
+ * @LastEditors: EDwin
+ * @LastEditTime: 2022-01-13 09:25:07
  */
 /**
  * @description: 质检结果回传，将结果更新到ERP接口表，WMS接口表，MES内部库存表
@@ -14,7 +14,9 @@
                                                     ];
  * @return {object} 执行结果{errorCode: 0, message: ''} 0：成功 1：完全失败 2：部分失败
  */
-function QCresultBack(corresPondence) {
+function QCresultBack (corresPondence) {
+    //WMS接口表信息
+    var WMS_dataBase = ['']
     var result = { errorCode: 0, message: '' };
     try {
         /*******************************WME质检信息推送接口************************ */

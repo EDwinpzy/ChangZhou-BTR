@@ -1,6 +1,4 @@
-function a (a, b, c) {
-    console.log(a)
-    console.log(b)
-    console.log(c)
-}
-a(1, 2)
+var a = [
+    ['', 'field', 'value1', 'value2'],
+    ['update','field', '']
+];
