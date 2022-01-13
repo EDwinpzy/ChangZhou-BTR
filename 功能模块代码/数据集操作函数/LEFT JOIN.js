@@ -8,7 +8,7 @@
  * @description: 数据联合，实现LEFT JOIN功能
  * @param {object[]} dataSetLeft - 左表数据集
  * @param {object[]} dataSetRight - 右表数据集
- * @param {object[]} field - 联合的字段['左表字段', '右表字段']
+ * @param {object[]} field - 联合的字段['左表字段', '右表字段'] (ON左右两侧的字段名)
  * @return {object[]} 数组对象
  */
 function sqlLeftjoin(dataSetLeft, dataSetRight, field) {
