@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-12 13:54:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-14 14:51:27
+ * @LastEditTime: 2022-01-14 16:50:05
  */
 /**
  * @description: 根据自动判定标识生成质检结果，在手动输入质检项结果，或接收质检中心传过来的质检项结果后，自动生成质检项结果和质检任务结果。
@@ -20,9 +20,9 @@ function QCresultGenerate(taskId, QC_testitem_result, taskResult) {
     //数据库配置信息['质检结果表']
     var dataBase = ['[dbo].[QC_result]', '[dbo].[QC_RealTimeTask]'];
     try {
-        var QC_RealTimeTask = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[1]} WHERE taskid = '${taskId}`); //获取当前质检任务表信息
         var QC_result = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[0]} WHERE taskid = '${taskId}`); //获取当前质检任务结果表信息
-        if (!QC_result || !QC_RealTimeTask) throw '该质检任务不存在！';
+        if (!QC_result) throw '质检任务' + taskId + '不存在！';
+        QC_RealTimeTask = $Function.JSON_to_dataSet(QC_RealTimeTask, ['privateTaskObj']);
         var WL_PDFLAG = QC_result[0].WL_PDFLAG; //物料自动判定标识
         if (WL_PDFLAG == 0) throw '该质检任务对应的物料不需要自动判定！';
         var QC_testitem_result_map = $Function.toMap(['innerCode'], QC_testitem_result);
@@ -81,8 +81,21 @@ function QCresultGenerate(taskId, QC_testitem_result, taskResult) {
         }
         var res = $Function.toDataSet($System.BTR, task_sqlStr);
         if (!res) throw '质检任务' + taskId + '结果更新失败！';
+
         //质检结果回传,若有质检任务结果则执行回传函数
-        if (QCresult) $Function.QCresultBack(QCinfo);
+        if (QCresult) {
+            //质检回传信息
+            var QC_RealTimeTask = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[1]} WHERE taskid = '${taskId}`); //获取当前质检任务表信息
+            if (!QC_RealTimeTask) throw '质检任务信息获取失败！质检结果未推送！';
+            var QCinfo = {
+                stockcode: QC_RealTimeTask.stockcode == undefined ? QC_RealTimeTask.productCode : QC_RealTimeTask.stockcode,
+                jobID: QC_RealTimeTask.tasktype == 1 ? QC_RealTimeTask.ERPbatch : QC_RealTimeTask.jobID, //若为成品/半成品则是MES大批次，若为原材料则是ERP大批次
+                jobIDS: QC_RealTimeTask.jobIDS,
+                QCresult: QCresult,
+            };
+            var res = $Function.QCresultBack(QCinfo);
+            if (!res) throw '质检结果推送失败！';
+        }
         return true;
     } catch (e) {
         console.log(e);
