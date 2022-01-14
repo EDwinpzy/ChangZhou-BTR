@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-12 13:47:11
+ * @LastEditTime: 2022-01-13 16:13:29
  * @FilePath: \负极二期\功能模块代码\质检任务生成.js
  */
 /**
@@ -14,7 +14,7 @@
                                     ERPorder: 'ERP订单号（若为原材料质检则该字段为ERP采购订单号）',
                                     ERPbatch: 'ERP批次号（一个ERP订单号对应多个ERP批次号，ERP批次号和MES批次号/ 制令单号/配比单号/工单号一一对应）（原材料则为ERP原材料大批次，成品则为根据MES大批次项ERP申请的ERP成品批次号）',
                                     jobID: '制令单号/配比单号（工单号，MES大批次号）----与MES大批次号一一对应（若为原材料则该字段为空）',
-                                    jobIDS: '小批次号(若质检规则为首检则该参数为空)（原材料小批次或投料小批次）',
+                                    jobIDS: '小批次号(若质检规则为首检则该参数为空)（原材料小批次或投料小批次）'（若为空则按大批次生成质检任务）
                                     rule: '质检规则 1：全检 2：首检',(若不传入则默认为全检)
                                     exesponsorv: '发起人',
                                     remark: '备注',
@@ -122,7 +122,7 @@ function QCtaskGenrate(taskType, exeCutor, info) {
         var res1 = $Function.toDataSet($System.BTR, sqlStr1);
         if (!res || !res1) throw '原材料质检任务生成失败！';
     } catch (e) {
-        console.log(e)
+        console.log(e);
         result.errorCode = 1;
         result.message = e;
     } finally {
