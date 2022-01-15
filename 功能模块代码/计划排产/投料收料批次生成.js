@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-30 09:03:49
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-14 19:00:46
+ * @LastEditTime: 2022-01-15 11:38:24
  */
 /**
  * @description: 投料/收料 计划/实际 批次生成，投料按原材料小批次投，收料按工单（mes大批次收料）
@@ -18,7 +18,7 @@ function FeedAndReceipt(jobID) {
         /**************************查询工单信息表，获取投料和收料信息************************/
         var productOrder_realTime = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBaseConfig[0]} WHERE jobID = '${jobID}'`);
         if (!productOrder_realTime) throw '工单信息表' + dataBaseConfig[0] + '查询失败！';
-        productOrder_realTime = productOrder_realTime[0];
+        productOrder_realTime = productOrder_realTime[0]; //对象
 
         /*******************************查询物料排产批次表******************************* */
         var materialObj = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBaseConfig[3]} WHERE jobID = '${jobID}'`);
@@ -27,109 +27,101 @@ function FeedAndReceipt(jobID) {
         /**********************************查询工作中心信息******************************* */
         var basic_center = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBaseConfig[4]}`);
         if (!basic_center) throw '工作中心表' + dataBaseConfig[4] + '查询失败！';
-        //生成工作中心树状结构体
-        var center = [];
-        var arr = $Function.sqlDistinct(basic_center, ['centerCode']);
-        arr.forEach(function (item) {
-            center.push(item.centerCode);
-        });
-        var centerObj = {}; //工作中心结构体
-        center.forEach(function (centerCode) {
-            centerObj[centerCode] = {};
-            //获取当前工作中心下的数组对象
-            var centerArr = $Function.dataFilter(basic_center, [{ field: 'centerCode', value: centerCode, match: '=' }]);
-            //按照工序去重，获取当前工作中心下的工序代码
-            centerArr = $Function.sqlDistinct(centerArr, ['processCode']);
-            var process = [];
-            centerArr.forEach(function (center_Arr) {
-                process.push(center_Arr.processCode);
-            });
-            process.forEach(function (processCode) {
-                //获取当前工序下的数组对象
-                var processArr = $Function.dataFilter(basic_center, [
-                    { field: 'centerCode', value: centerCode, match: '=' },
-                    { field: 'processCode', value: processCode, match: '=' },
-                ]);
-                //按照设备去重，获取当前工序下的设备
-                processArr = $Function.sqlDistinct(centerArr, ['equipCode']);
-                var equip = [];
-                processArr.forEach(function (process_Arr) {
-                    equip.push(process_Arr.equipCode);
-                });
-                centerObj[centerCode][processCode] = equip;
-            });
-        });
 
         /**********************投料表字段配置  键为投料表字段名 值为 数据来源表.字段名 一一对应关系*********************/
         var putField = {
-            ERPorder: 'productOrder_realTime.ERPorder',
-            ERPbatch: 'productOrder_realTime.ERPbatch',
-            jobID: 'productOrder_realTime.jobID',
-            materialSmallBatch: 'materialObj.materialSmallBatch',
-            putName: 'materialObj.materialName',
-            putCode: 'materialObj.materialCode',
-            planLine: 'productOrder_realTime.line',
-            planProcess: 'productOrder_realTime.process',
-            planCenter: 'productOrder_realTime.ERPGZZX',
-            planWeight: 'materialObj.planWeight',
-            planDateTime: 'productOrder_realTime.planStartTime',
+            ERPorder: 'productOrder_realTime.ERPorder', //ERP生产订单号
+            ERPbatch: 'productOrder_realTime.ERPbatch', //ERP批次号
+            jobID: 'productOrder_realTime.jobID', //工单号
+            materialSmallBatch: 'materialObj.materialSmallBatch', //原材料小批次
+            putName: 'materialObj.materialName', //投料名称（原材料名称）
+            putCode: 'materialObj.materialCode', //投料代码（原材料代码）
+            planLine: 'productOrder_realTime.line', //计划线别（产线：天然还是人造）
+            planWeight: 'materialObj.planWeight', //计划投料重量
+            planDateTime: 'productOrder_realTime.planStartTime', //计划投料时间
+            planCenter: 'basic_center.centerCode', //计划工作中心
+            processCode: 'basic_center.planProcess', //计划工序
+            equipCode: 'basic_center.planEquip', //计划设备/站点
         };
-
+        var putField_field = []; //插入投料表字段名
+        for (var key in putField) {
+            //投料表字段名
+            putField_field.push(key);
+        }
         /***********************收料表字段配置  键为收料表字段名 值为工单信息表字段名 一一对应关系***********************/
         //判断工单类型
         var getField = {
-            ERPorder: 'ERPorder',
-            ERPbatch: 'ERPbatch',
-            jobID: 'jobID',
-            materialSmallBatch: 'materialObj.materialSmallBatch',
+            ERPorder: 'productOrder_realTime.ERPorder', //ERP生产订单号
+            ERPbatch: 'productOrder_realTime.ERPbatch', //ERP批次号
+            jobID: 'productOrder_realTime.jobID', //工单号
+            productSmallBatch: '',
             getName: productOrder_realTime.type == 1 ? 'ByProductName' : 'productName',
             getCode: productOrder_realTime.type == 1 ? 'ByProductCode' : 'productCode',
+            planCenter: 'basic_center.centerCode', //计划工作中心
+            processCode: 'basic_center.planProcess', //计划工序
+            equipCode: 'basic_center.planEquip', //计划设备/站点
         };
 
-        
-
-        /*******************************生成投料批次表***************************** */
-        var field = []; //插入投料表字段名
-        var sqlStr = `INSERT INTO ${dataBaseConfig[1]} (${field.join(',')}) VALUES `;
-        for (var key in putField) {
-            //投料表字段名
-            field.push(key);
+        var sqlStr = `INSERT INTO ${dataBaseConfig[1]} (${putField_field.join(',')}) VALUES `; //投料表SQL语句
+        var sqlStr1 = `INSERT INTO ${dataBaseConfig[2]} (${field.join(',')}) VALUES (${value.join(',')})`; //收料表SQL语句
+        basic_center = $Function.dataFilter(basic_center, [{ field: 'centerCode', value: productOrder_realTime.ERPGZZX, match: '=' }]);
+        switch (rule) {
+            case 1:
+                basic_center = $Function.sqlDistinct(basic_center, ['centerCode']); //对工作中心去重
+                basic_center.forEach(function (item) {
+                    item.processCode = ''; //将工序赋值为空
+                    item.equipCode = ''; //将设备赋值为空
+                });
+                break;
+            case 2:
+                basic_center = $Function.sqlDistinct(basic_center, ['processCode']); //对工序去重
+                basic_center.forEach(function (item) {
+                    item.equipCode = '';
+                });
+                break;
         }
-        materialObj.forEach(function (materialObj) {
-            var value = []; //插入投料表字段值
-            for (var key in putField) {
-                var text = eval(putField[key].split('.')[0])[putField[key].split('.')[1]];
-                value.push("'" + text + "'");
-            }
-            sqlStr += `(${value.join(',')}),`;
+        basic_center.forEach(function (item) {
+            putField_field.forEach(function (field) {
+                item[field] = eval(putField[field].split('.')[0])[putField[field].split('.')[1]];
+            });
         });
-        sqlStr.substring(0, sqlStr.length - 1);
-
-        /****************************生成收料批次表******************************* */
-        // for (var key in getField) {
-        //     //收料表字段名
-        //     field.push(key);
-        //     //判断是否为私有成员对象字段
-        //     if (putField[key].includes('.')) {
-        //         var objKey = putField[key].split('.')[0];
-        //         var objValue = putField[key].split('.')[1];
-        //         //将私有成员对象反格式化
-        //         var obj = JSON.parse(data[0][objKey]);
-        //         value.push("'" + obj[objValue] + "'");
-        //     } else {
-        //         value.push("'" + data[0][putField[key]] + "'");
-        //     }
-        // }
-        var sqlStr1 = `INSERT INTO ${dataBaseConfig[2]} (${field.join(',')}) VALUES (${value.join(',')})`;
+        basic_center.forEach(function (basic_center, index) {
+            //每种原料都要生成一条投料收料计划
+            for (var i = 0; i < materialObj.length; i++) {
+                //生成值数组
+                var putField_value = [];
+                var getField_value = [];
+                //投料
+                putField_field.forEach(function (field) {
+                    if (eval(putField[field].split('.')[0])[putField[field].split('.')[1]] == undefined) {
+                        putField_value.push(eval(putField[field].split('.')[0])[i][putField[field].split('.')[1]]);
+                    } else {
+                        putField_value.push("'" + eval(putField[field].split('.')[0])[putField[field].split('.')[1]] + "'");
+                    }
+                });
+                //收料
+                getField_field.forEach(function (field) {
+                    //生成收料小批次
+                    if (field == 'productSmallBatch') {
+                        index += 1;
+                        getField_value.push("'" + basic_center.centerCode + basic_center.processCode + basic_center.equipCode + '-' + index + "'");
+                    } else {
+                        getField_value.push("'" + eval(getField[field].split('.')[0])[getField[field].split('.')[1]] + "'");
+                    }
+                });
+            }
+            sqlStr += `(${putField_value.join(',')}),`;
+            sqlStr1 += `(${getField_value.join(',')}),`;
+        });
+        sqlStr.substring(0, sqlStr - 1);
+        sqlStr1.substring(0, sqlStr1 - 1);
         var res = $Function.toDataSet($System.BTR, sqlStr);
         var res1 = $Function.toDataSet($System.BTR, sqlStr1);
-        if (!res) throw '已存在该制令单/配比单的收料计划！请先删除！';
-        if (!res1) throw res.errorCode + ':' + res.message + '   收料批次生成失败失败！';
+        if (!res || !res1) throw '投料/收料计划生成失败！';
+        return true;
     } catch (e) {
-        result.errorCode = 1;
-        result.message = e;
+        console.log(e);
         $Function.tip('error', e);
-    } finally {
-        return result;
+        return false;
     }
 }
