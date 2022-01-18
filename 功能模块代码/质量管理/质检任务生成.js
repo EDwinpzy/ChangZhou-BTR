@@ -2,12 +2,12 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-13 16:13:29
+ * @LastEditTime: 2022-01-18 09:31:39
  * @FilePath: \负极二期\功能模块代码\质检任务生成.js
  */
 /**
  * @description: 实现生成原材料质检任务，半成品取样任务，半成品质检任务，成品取样任务，成品质检任务函数
- * @param {Number} taskType - 任务类型 1：原材料质检 2：半成品取样 3：半成品质检 4：成品取样 5：成品质检
+ * @param {Number} taskType - 任务类型 1：原材料质检  3：半成品质检  5：成品质检
  * @param {string} exesponsor - 发起人
  * @param {object[]} info - 传入的原材料/半成品/成品信息(数组对象)
     *                         [{
@@ -43,7 +43,7 @@
                                 }, ...]    
  * @return {number} {errorCode: 0, message: ''}
  */
-function QCtaskGenrate(taskType, exeCutor, info) {
+function QCtaskGenrate(taskType, info) {
     //数据库表完整路径名称(必须包含数据库名称)['质检实时任务表', '质检结果表', '质检项表', '库存批次信息表']
     var dataBase = ['[dbo].[QC_RealTimeTask]', '[dbo].[QC_result]', '[dbo].[QC_testitem]', '[dbo].[storage_batch]'];
     try {
