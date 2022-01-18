@@ -1,0 +1,1 @@
+{"expose":{"developServerIP":"127.0.0.1","httpPort":11005,"wsPort":-1},"oauth":{"host":"127.0.0.1:11006","clientname":"KingIDE","description":"KingIDE"},"redis":{"host":"127.0.0.1:9000","pwd":"kingview"},"opsCenter":{"host":"127.0.0.1:23001","httpType":0}}
