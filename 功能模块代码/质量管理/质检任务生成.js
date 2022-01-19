@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 15:09:35
+ * @LastEditTime: 2022-01-19 16:29:19
  * @FilePath: \负极二期\功能模块代码\质检任务生成.js
  */
 /**
@@ -20,7 +20,6 @@
                                     remark: '备注',
                                     ****************************若为原材料质检需要加入如下对象******************************
                                     privateTaskObj: {
-                                        taskid: '入库单号',
                                         starttime: '入库时间',
                                         supplierName: '供应商名称',
                                         supplierNumber: '供应商代码',

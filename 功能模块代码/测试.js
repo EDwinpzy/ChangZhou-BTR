@@ -1,2 +1,1 @@
-var a = 'asd';
-console.log(a.substring(1))
+console.log('5' == 5);
