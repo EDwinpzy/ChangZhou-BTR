@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-19 11:14:04
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 17:31:14
+ * @LastEditTime: 2022-01-19 17:41:07
  */
 /**
  * @description: 轮询数据库表QC_RealTimeTask，将已生成质检结果且未推送的信息推送给ERP、WMS、MES
@@ -19,7 +19,7 @@ function QCresultPush() {
         productQcInfo = JSON_to_dataSet(productQcInfo, ['privateTaskObj']);
         var nowDataTime = GetDataTimeFunc();
         var WMS_arr = [];
-        var ERP_arr = []
+        var ERP_arr = [];
         productQcInfo.forEach(function (item) {
             var WMS_obj = {
                 Item_No: item.productCode,
@@ -29,9 +29,7 @@ function QCresultPush() {
                 Sync_Time: nowDataTime,
             };
             WMS_arr.push(WMS_obj);
-            var ERP_arr = {
-                ZID: 
-            };
+            var ERP_arr = {};
         });
         var res = SqlInsert(WMS_arr, '[dbo].[WMS_QCinfo]');
 
