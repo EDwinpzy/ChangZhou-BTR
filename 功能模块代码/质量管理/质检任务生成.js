@@ -2,13 +2,12 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 16:29:19
+ * @LastEditTime: 2022-01-19 16:38:43
  * @FilePath: \负极二期\功能模块代码\质检任务生成.js
  */
 /**
  * @description: 实现生成原材料质检任务，半成品取样任务，半成品质检任务，成品取样任务，成品质检任务函数
  * @param {Number} taskType - 任务类型 1：原材料质检  3：半成品质检  5：成品质检
- * @param {string} exesponsor - 发起人
  * @param {object[]} info - 传入的原材料/半成品/成品信息(数组对象)
     *                         [{
                                     ERPorder: 'ERP订单号（若为原材料质检则该字段为ERP采购订单号）',
