@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-10 13:25:09
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 08:55:41
+ * @LastEditTime: 2022-01-19 10:18:27
  */
 /**
  * @description: 写入日志信息(同步函数)
@@ -17,7 +17,7 @@ function logWrite(path, text) {
             fs.mkdirSync(dirname);
         }
     }
-    fs.writeFileSync(path, GetDataTimeFunc() + '\r\n', { flag: 'a', encoding: 'utf-8', mode: '0666' });
+    fs.writeFileSync(path, GetDataTimeFunc() + '  操作人：' + $System.userName + '\r\n', { flag: 'a', encoding: 'utf-8', mode: '0666' });
     fs.writeFileSync(path, text, { flag: 'a', encoding: 'utf-8', mode: '0666' });
     fs.writeFileSync(path, '\r\n\r\n', { flag: 'a', encoding: 'utf-8', mode: '0666' });
 }

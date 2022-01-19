@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-18 09:31:39
+ * @LastEditTime: 2022-01-19 15:09:35
  * @FilePath: \负极二期\功能模块代码\质检任务生成.js
  */
 /**
@@ -16,7 +16,7 @@
                                     jobID: '制令单号/配比单号（工单号，MES大批次号）----与MES大批次号一一对应（若为原材料则该字段为空）',
                                     jobIDS: '小批次号(若质检规则为首检则该参数为空)（原材料小批次或投料小批次）'（若为空则按大批次生成质检任务）
                                     rule: '质检规则 1：全检 2：首检',(若不传入则默认为全检)
-                                    exesponsorv: '发起人',
+                                    exesponsor: '发起人',
                                     remark: '备注',
                                     ****************************若为原材料质检需要加入如下对象******************************
                                     privateTaskObj: {
@@ -35,7 +35,7 @@
                                         processpath: '工序名称',
                                         line: '产线',
                                         station: '站点',
-                                        supplierNumber: '设备名称',
+                                        equipName: '设备名称',
                                         productCode: '产品代码（成品或半成品）',
                                         productName: 产品名称
                                         productDescript: 产品描述
@@ -47,10 +47,6 @@ function QCtaskGenrate(taskType, info) {
     //数据库表完整路径名称(必须包含数据库名称)['质检实时任务表', '质检结果表', '质检项表', '库存批次信息表']
     var dataBase = ['[dbo].[QC_RealTimeTask]', '[dbo].[QC_result]', '[dbo].[QC_testitem]', '[dbo].[storage_batch]'];
     try {
-        var result = {
-            errorCode: 0,
-            message: '',
-        };
         var nowData = $Function.GetDataTimeFunc(); //获取任务生成时间
         var QC_testitem = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[2]}`); //获取质检项数据集
         var QC_RealTimeTask = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[0]} WHERE tasktype IN (1, 3 ,5) AND taskstatus = 3`); //获取已完成的质检任务，用于在生成新任务的时候确定当前任务次数
@@ -64,7 +60,7 @@ function QCtaskGenrate(taskType, info) {
         for (var key in QC_testitem) {
             field1.push(key);
         }
-        var sqlStr = `INSERT INTO ${dataBase[0]} (${field.join(',')}, taskid, tasktype, taskNum) VALUES `;
+        var sqlStr = `INSERT INTO ${dataBase[0]} (${field.join(',')}, taskid, tasktype, taskNum, starttime) VALUES `;
         var sqlStr1 = `INSERT INTO ${dataBase[1]} (${field1.join(',')}, taskid) VALUES `;
         info.forEach(function (item) {
             var taskId = $Function.getID(taskType + 1);
@@ -114,6 +110,7 @@ function QCtaskGenrate(taskType, info) {
             });
             taskNum += 1;
             value.push(taskNum); //将当前任务次数推入数组中
+            value.push(nowData); //将当前时间推入数组中
             sqlStr += `(${value.join(',')}),`;
         });
         sqlStr.substring(0, sqlStr.length - 1);
@@ -121,11 +118,16 @@ function QCtaskGenrate(taskType, info) {
         var res = $Function.toDataSet($System.BTR, sqlStr);
         var res1 = $Function.toDataSet($System.BTR, sqlStr1);
         if (!res || !res1) throw '原材料质检任务生成失败！';
+        /********************更新库存表storage_batch质检结果标志位****************** */
+        var jobIDS = [];
+        info.forEach(function (item) {
+            if (jobIDS.indexOf(item.jobIDS) == -1) jobIDS.push("'" + item.jobIDS + "'"); //获取小批次号数组
+        });
+        var res2 = toDataSet($System.BTR, `UPDATE dataBase[3] SET QCresult = 0 WHERE jobIDS IN ${jobIDS.join(',')}`);
+        if (!res2) throw '库存表storage_batch更新失败！';
+        return true;
     } catch (e) {
         console.log(e);
-        result.errorCode = 1;
-        result.message = e;
-    } finally {
-        return result;
+        return false;
     }
 }

@@ -1,8 +1,8 @@
 /*
  * @Author: EDwin
  * @Date: 2021-12-30 08:57:16
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2022-01-04 14:27:34
+ * @LastEditors: EDwin
+ * @LastEditTime: 2022-01-19 10:17:40
  */
 /**
  * @description: 执行SQL语句
@@ -31,6 +31,7 @@ function toDataSet(dataSource, sqlStr) {
             return true;
         }
     } catch (e) {
+        $Function.logWrite($System.errorLogPath, e);//写入错误日志
         console.log(e);
         $Function.tip('error', e);
         return false;
