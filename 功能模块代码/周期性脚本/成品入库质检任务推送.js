@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-18 14:05:05
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 15:20:03
+ * @LastEditTime: 2022-01-20 14:15:35
  */
 /**
  * @description: 成品入库成功执行完成，收到WMS成功反馈后，生成质检任务,定时查询指令执行反馈(WMS_feedback)表。

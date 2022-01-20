@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-19 11:14:04
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 17:41:07
+ * @LastEditTime: 2022-01-19 17:47:11
  */
 /**
  * @description: 轮询数据库表QC_RealTimeTask，将已生成质检结果且未推送的信息推送给ERP、WMS、MES
@@ -33,7 +33,7 @@ function QCresultPush() {
         });
         var res = SqlInsert(WMS_arr, '[dbo].[WMS_QCinfo]');
 
-        /*********************************** 回传至ERP系统 ********************************/
+        /*********************************** 回传至ERP系统 **********************************/
 
         if (!res) throw 'WMS质检回传失败！';
     } catch (e) {}
