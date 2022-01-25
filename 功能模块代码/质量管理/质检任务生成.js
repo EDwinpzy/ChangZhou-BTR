@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 16:38:43
+ * @LastEditTime: 2022-01-21 10:35:07
  * @FilePath: \负极二期\功能模块代码\质检任务生成.js
  */
 /**
@@ -60,12 +60,14 @@ function QCtaskGenrate(taskType, info) {
         }
         var sqlStr = `INSERT INTO ${dataBase[0]} (${field.join(',')}, taskid, tasktype, taskNum, starttime) VALUES `;
         var sqlStr1 = `INSERT INTO ${dataBase[1]} (${field1.join(',')}, taskid) VALUES `;
-        info.forEach(function (item) {
+        for (var i = 0; i < info.length; i++) {
+            var QCtask = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[0]}`);
+            if (QCtask) continue; // 若已存在该小批次质检任务，则不能重复生成
             var taskId = $Function.getID(taskType + 1);
             if (taskType == 1 || taskType == 3 || taskType == 5) {
                 /*************生成质检结果表QC_result***********/
                 var stockCode;
-                taskType == 1 ? (stockCode = item.privateTaskObj.stockcode) : (stockCode = item.privateTaskObj.productCode); //获取物料代码
+                taskType == 1 ? (stockCode = info[i].privateTaskObj.stockcode) : (stockCode = info[i].privateTaskObj.productCode); //获取物料代码
                 var task_testItem = $Function.dataFilter(QC_testitem, { field: 'WLH', value: stockCode, match: '=' });
                 if (task_testItem == false) throw '查询不到物料编号为' + stockCode + '的质检项信息';
 
@@ -82,20 +84,20 @@ function QCtaskGenrate(taskType, info) {
             /*************生成质检任务表QC_RealTimeTask**************/
             var value = [];
             field.forEach(function (key) {
-                if (key == privateTaskObj) item[key] = JSON.stringify(item[key]); //私有成员对象转换成JSON字符串
-                value.push("'" + item[key] + "'");
+                if (key == privateTaskObj) info[i][key] = JSON.stringify(info[i][key]); //私有成员对象转换成JSON字符串
+                value.push("'" + info[i][key] + "'");
             });
             value.push("'" + taskId + "'");
             value.push("'" + taskType + "'");
             var taskNum = 1;
             //获取该批次已完成的任务记录中当前任务次数最大值，新生成的任务中当前任务次数字段在此基础上加1
             var batch;
-            if (item.jobIDS != '' || item.jobIDS != undefined) {
-                batch = item.jobIDS;
-            } else if (item.jobID != '' || item.jobID != undefined) {
-                batch = item.jobID;
-            } else if (item.ERPbatch != '' || item.ERPbatch != undefined) {
-                batch = item.ERPbatch;
+            if (info[i].jobIDS != '' || info[i].jobIDS != undefined) {
+                batch = info[i].jobIDS;
+            } else if (info[i].jobID != '' || info[i].jobID != undefined) {
+                batch = info[i].jobID;
+            } else if (info[i].ERPbatch != '' || info[i].ERPbatch != undefined) {
+                batch = info[i].ERPbatch;
             } else {
                 throw '批次信息缺失！';
             }
@@ -110,7 +112,8 @@ function QCtaskGenrate(taskType, info) {
             value.push(taskNum); //将当前任务次数推入数组中
             value.push(nowData); //将当前时间推入数组中
             sqlStr += `(${value.join(',')}),`;
-        });
+        }
+
         sqlStr.substring(0, sqlStr.length - 1);
         sqlStr1.substring(0, sqlStr1.length - 1);
         var res = $Function.toDataSet($System.BTR, sqlStr);
