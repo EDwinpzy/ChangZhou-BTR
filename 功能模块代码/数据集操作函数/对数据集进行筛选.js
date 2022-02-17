@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-14 10:42:26
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 10:48:27
+ * @LastEditTime: 2022-02-17 11:06:02
  */
 /**
  * @description 对数据集进行筛选
@@ -20,42 +20,42 @@ function dataFilter(dataSet, filter) {
                             dataSet.splice(i, 1);
                         }
                     }
-                    break;
+                    continue;
                 case '!=':
                     for (var i = 0; i < dataSet.length; i++) {
                         if (dataSet[i][filter[j].field] == filter[j].value) {
                             dataSet.splice(i, 1);
                         }
                     }
-                    break;
+                    continue;
                 case '>':
                     for (var i = 0; i < dataSet.length; i++) {
                         if (dataSet[i][filter[j].field] <= filter[j].value) {
                             dataSet.splice(i, 1);
                         }
                     }
-                    break;
+                    continue;
                 case '>=':
                     for (var i = 0; i < dataSet.length; i++) {
                         if (dataSet[i][filter[j].field] < filter[j].value) {
                             dataSet.splice(i, 1);
                         }
                     }
-                    break;
+                    continue;
                 case '<':
                     for (var i = 0; i < dataSet.length; i++) {
                         if (dataSet[i][filter[j].field] >= filter[j].value) {
                             dataSet.splice(i, 1);
                         }
                     }
-                    break;
+                    continue;
                 case '<=':
                     for (var i = 0; i < dataSet.length; i++) {
                         if (dataSet[i][filter[j].field] > filter[j].value) {
                             dataSet.splice(i, 1);
                         }
                     }
-                    break;
+                    continue;
                 case 'like':
                     for (var i = 0; i < dataSet.length; i++) {
                         var reg = eval('/' + filter[j].value + '/ig');
@@ -63,17 +63,20 @@ function dataFilter(dataSet, filter) {
                             dataSet.splice(i, 1);
                         }
                     }
-                    break;
+                    continue;
                 case 'in':
                     for (var i = 0; i < dataSet.length; i++) {
                         var value = filter[j].value.split(',');
-                        if (value.indexOf(dataSet[i][filter[j].field]) <= -1) {
-                            dataSet.splice(i, 1);
-                        }
+                        var flag = 0;
+                        value.forEach(function (item) {
+                            if (item == dataSet[i][filter[j].field]) flag = 1;
+                        });
+                        if (flag === 0) dataSet.splice(i, 1);
                     }
+                    continue;
             }
-            return dataSet;
         }
+        return dataSet;
     } catch (e) {
         console.log(e);
         return false;

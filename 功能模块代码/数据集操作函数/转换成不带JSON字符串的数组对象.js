@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-11 09:46:24
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-14 16:01:59
+ * @LastEditTime: 2022-02-17 11:09:58
  */
 /**
  * @description: 将带JSON字符串的数据集转换成能直接在数据网格展示的数据集
@@ -26,3 +26,7 @@ function JSON_to_dataSet(dataSet, field) {
         return false;
     }
 }
+JSON_to_dataSet([
+    { name: 'pzy', age: 12, sex: 'man' ,obj: },
+    { name: 'cc', age: 1233, sex: 'woman' },
+]);

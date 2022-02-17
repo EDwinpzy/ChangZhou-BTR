@@ -2,16 +2,18 @@
  * @Author: EDwin
  * @Date: 2021-12-27 09:40:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-25 14:27:14
+ * @LastEditTime: 2022-02-17 14:17:47
  */
 /**
  * @description: 质检结果回传，将结果更新到ERP接口表，WMS接口表，MES内部库存表
  * @param {object[]} QCinfo - WMS质检推送信息
  *                                  {
+                                        system: [1,2,3] '回传位置 1：ERP，2：WMS，3：MES'
                                         stockcode: '物料编号',
+                                        stocktype： '物料类型 1：原材料  2：半成品/成品'
                                         jobID: '若为成品/半成品则是MES大批次，若为原材料则是ERP大批次',
-                                        jobIDS: '原材料小批次/成品半成品小批次（收料小批次）',
-                                        QCresult: '质检结果 0：不合格 1：合格',
+                                        jobIDS: '原材料小批次/成品半成品小批次（收料小批次）',(若为空则按大批次来推送质检结果)
+                                        QCresult: '质检结果 0：不合格 1：合格 2: 待检',
                                     }
  * @return {boolean} 成功返回true，失败返回false并在控制台打印错误信息
  */
@@ -22,23 +24,45 @@ function QCresultBack(QCinfo) {
     var MES_dataBase = ['storage_batch'];
     try {
         /*******************************WME质检信息推送接口*************************** */
-        var WMS_config = {
-            //WMS接口表字段信息及对应的值
-            Item_No: QCinfo.stockcode,
-            Batch_No: QCinfo.jobID,
-            SecondBatch_No: QCinfo.jobIDS,
-            Quality_Result: QCinfo.QCresult == 0 ? 20 : 10,
-            Sync_Time: $Function.GetDataTimeFunc(),
-        };
-
-        var WMS_field = [];
-        var WMS_value = [];
-        for (var key in WMS_config) {
-            WMS_field.push(key);
-            WMS_value.push("'" + WMS_config[key] + "'");
+        if (QCinfo.indexOf(2) > -1) {
+            if (QCinfo.jobIDS !== undefined && QCinfo.jobIDS !== '') {
+                //按小批次推送
+                var WMS_config = {
+                    //WMS接口表字段信息及对应的值
+                    Item_No: QCinfo.stockcode,
+                    Batch_No: QCinfo.jobID,
+                    SecondBatch_No: QCinfo.jobIDS,
+                    Quality_Result: QCinfo.QCresult == 0 ? 20 : QCinfo.QCresult == 1 ? 00 : 10,
+                    Sync_Time: $Function.GetDataTimeFunc(),
+                };
+                var WMS_field = [];
+                var WMS_value = [];
+                for (var key in WMS_config) {
+                    WMS_field.push(key);
+                    WMS_value.push("'" + WMS_config[key] + "'");
+                }
+                var res = $Function.toDataSet($System.BTR, `INSERT INTO ${WMS_dataBase[0]} (${WMS_field.join(',')}) VALUES (${WMS_value.join(',')})`);
+                if (!res) throw 'WMS质检信息接口表插入失败！';
+            } else {
+                //按大批次推送
+                var WMS_config = {
+                    //WMS接口表字段信息及对应的值
+                    Item_No: QCinfo.stockcode,
+                    Batch_No: QCinfo.jobID,
+                    SecondBatch_No: QCinfo.jobIDS,
+                    Quality_Result: QCinfo.QCresult == 0 ? 20 : QCinfo.QCresult == 1 ? 00 : 10,
+                    Sync_Time: $Function.GetDataTimeFunc(),
+                };
+                var WMS_field = [];
+                var WMS_value = [];
+                for (var key in WMS_config) {
+                    WMS_field.push(key);
+                    WMS_value.push("'" + WMS_config[key] + "'");
+                }
+                var res = $Function.toDataSet($System.BTR, `INSERT INTO ${WMS_dataBase[0]} (${WMS_field.join(',')}) VALUES (${WMS_value.join(',')})`);
+                if (!res) throw 'WMS质检信息接口表插入失败！';
+            }
         }
-        var res = $Function.toDataSet($System.BTR, `INSERT INTO ${WMS_dataBase[0]} (${WMS_field.join(',')}) VALUES (${WMS_value.join(',')})`);
-        if (!res) throw 'WMS质检信息接口表插入失败！';
 
         /*******************************MES内部库存表质检推送**************************** */
         var MES_config = {

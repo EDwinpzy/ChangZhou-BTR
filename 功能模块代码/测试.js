@@ -1,2 +1,6 @@
-var patt = new RegExp('panama', 'i');
-if (patt.test('123panama123')) console.log(1);
+var obj = {
+    address: 'beijing',
+    hight: 123,
+};
+var str = JSON.stringify(obj);
+console.log(str);
