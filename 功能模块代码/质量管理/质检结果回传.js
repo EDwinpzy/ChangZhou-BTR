@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-27 09:40:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 15:22:22
+ * @LastEditTime: 2022-02-17 15:24:04
  */
 /**
  * @description: 质检结果回传，将结果更新到ERP接口表，WMS接口表，MES内部库存表
@@ -14,7 +14,6 @@
                                         jobID: '若为成品/半成品则是MES大批次，若为原材料则是ERP大批次',
                                         jobIDS: '原材料小批次/成品半成品小批次（收料小批次）',(若为空则按大批次来推送质检结果)
                                         QCresult: '质检结果 0：不合格 1：合格 2: 待检',
-                                        remark: '质检结果描述'
                                     }
  * @return {boolean} 成功返回true，失败返回false并在控制台打印错误信息
  */
