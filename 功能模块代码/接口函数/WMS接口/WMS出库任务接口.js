@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-19 16:04:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-20 16:18:33
+ * @LastEditTime: 2022-01-25 14:54:21
  */
 /**
  * @description: 手动生成一条出库任务下发至WMS出库指令接口表中
@@ -18,10 +18,12 @@ function WMS_outTask(outInfo) {
         outInfo.forEach(function (item) {
             jobIDS_arr.push("'" + item.jobIDS + "'");
         });
+        //查库存表
         var storage_batch = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[1]} WHERE jobIDS IN (${jobIDS_arr.join(',')})`);
         if (!storage_batch) throw '库存信息查询失败！';
         storage_batch = $Function.toMap(['jobIDS'], storage_batch); //转换成字典
-        var WMS_outstore_order = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[0]} WHERE Package_Code IN (${jobIDS_arr.join(',')})`); //查询该小批次的出库任务
+        //查出入库任务表中的入库任务
+        var WMS_outstore_order = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBase[0]} WHERE Package_Code IN (${jobIDS_arr.join(',')}) AND in_or _out = 2`); //查询该小批次的出库任务
         if (!WMS_outstore_order) throw 'WMS出库指令接口表查询失败！';
         var existOrder = [];
         outInfo.forEach(function (item) {

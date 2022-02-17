@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-27 09:40:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-13 14:06:05
+ * @LastEditTime: 2022-01-25 14:27:14
  */
 /**
  * @description: 质检结果回传，将结果更新到ERP接口表，WMS接口表，MES内部库存表
@@ -16,11 +16,12 @@
  * @return {boolean} 成功返回true，失败返回false并在控制台打印错误信息
  */
 function QCresultBack(QCinfo) {
+    //WMS接口表信息['质检信息推送接口表']
+    var WMS_dataBase = ['WMS_QCinfo'];
+    //MES内部表信息['库存批次信息表']
+    var MES_dataBase = ['storage_batch'];
     try {
         /*******************************WME质检信息推送接口*************************** */
-
-        //WMS接口表信息['质检信息推送接口表']
-        var WMS_dataBase = ['WMS_QCinfo'];
         var WMS_config = {
             //WMS接口表字段信息及对应的值
             Item_No: QCinfo.stockcode,
@@ -40,9 +41,6 @@ function QCresultBack(QCinfo) {
         if (!res) throw 'WMS质检信息接口表插入失败！';
 
         /*******************************MES内部库存表质检推送**************************** */
-
-        //MES内部表信息['库存批次信息表']
-        var MES_dataBase = ['storage_batch'];
         var MES_config = {
             //MES内部表字段信息及对应的值
             jobIDS: QCinfo.jobIDS,
@@ -70,7 +68,10 @@ function QCresultBack(QCinfo) {
         });
         sqlStr = sqlStr.substring(0, sqlStr.length - 4);
         var res = $Function.toDataSet($System.BTR, sqlStr);
-        if (!res) throw 'MES内部表' + MES_dataBase[0] + '更新失败！'
+        if (!res) throw 'MES内部表' + MES_dataBase[0] + '更新失败！';
+
+        /*********************************ERP质检结果推送************************************* */
+
         return true;
     } catch (e) {
         console.log(e);

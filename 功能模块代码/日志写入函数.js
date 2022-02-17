@@ -2,14 +2,14 @@
  * @Author: EDwin
  * @Date: 2022-01-10 13:25:09
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 10:18:27
+ * @LastEditTime: 2022-01-31 10:52:35
  */
 /**
  * @description: 写入日志信息(同步函数)
  * @param {*}
  * @return {*}
  */
-function logWrite(path, text) {
+function logWrite(dirname, text) {
     const fs = require('fs');
     const path = require('path');
     if (!fs.existsSync(dirname)) {
