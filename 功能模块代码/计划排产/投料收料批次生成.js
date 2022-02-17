@@ -2,30 +2,31 @@
  * @Author: EDwin
  * @Date: 2021-12-30 09:03:49
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-15 11:38:24
+ * @LastEditTime: 2022-02-17 17:40:14
  */
 /**
  * @description: 投料/收料 计划/实际 批次生成，投料按原材料小批次投，收料按工单（mes大批次收料）
- * @param {object[object]} jobID - 制令单号/配比单号（工单号,MES成品批次号）
+ * @param {object[object]} InParam.jobID - 制令单号/配比单号（工单号,MES成品批次号）
  * @param {number} rule - 投料收料批次生成规则 1：按ERP工作中心生成  2：按工序生成  3：按设备生成
  * @return {*}
  */
-function FeedAndReceipt(jobID) {
+function FeedAndReceipt(InParam, OutParam, RequestID, Token) {
+    var jobID = InParam.jobID;
     //数据库基础信息配置数组['生产工单表', '投料实时计划表', '收料历史计划表', '物料排产批次信息表', '工作中心表']
     var dataBaseConfig = ['productOrder_realTime', 'put_realTime', 'get_realTime', 'materialObj', 'basic_center'];
 
     try {
         /**************************查询工单信息表，获取投料和收料信息************************/
-        var productOrder_realTime = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBaseConfig[0]} WHERE jobID = '${jobID}'`);
+        var productOrder_realTime = toDataSet(global.BTR, `SELECT * FROM ${dataBaseConfig[0]} WHERE jobID = '${jobID}'`);
         if (!productOrder_realTime) throw '工单信息表' + dataBaseConfig[0] + '查询失败！';
         productOrder_realTime = productOrder_realTime[0]; //对象
 
         /*******************************查询物料排产批次表******************************* */
-        var materialObj = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBaseConfig[3]} WHERE jobID = '${jobID}'`);
+        var materialObj = toDataSet(global.BTR, `SELECT * FROM ${dataBaseConfig[3]} WHERE jobID = '${jobID}'`);
         if (!materialObj) throw '物料排产批次表' + dataBaseConfig[3] + '查询失败！';
 
         /**********************************查询工作中心信息******************************* */
-        var basic_center = $Function.toDataSet($System.BTR, `SELECT * FROM ${dataBaseConfig[4]}`);
+        var basic_center = toDataSet(global.BTR, `SELECT * FROM ${dataBaseConfig[4]}`);
         if (!basic_center) throw '工作中心表' + dataBaseConfig[4] + '查询失败！';
 
         /**********************投料表字段配置  键为投料表字段名 值为 数据来源表.字段名 一一对应关系*********************/
@@ -64,17 +65,17 @@ function FeedAndReceipt(jobID) {
 
         var sqlStr = `INSERT INTO ${dataBaseConfig[1]} (${putField_field.join(',')}) VALUES `; //投料表SQL语句
         var sqlStr1 = `INSERT INTO ${dataBaseConfig[2]} (${field.join(',')}) VALUES (${value.join(',')})`; //收料表SQL语句
-        basic_center = $Function.dataFilter(basic_center, [{ field: 'centerCode', value: productOrder_realTime.ERPGZZX, match: '=' }]);
+        basic_center = dataFilter(basic_center, [{ field: 'centerCode', value: productOrder_realTime.ERPGZZX, match: '=' }]);
         switch (rule) {
             case 1:
-                basic_center = $Function.sqlDistinct(basic_center, ['centerCode']); //对工作中心去重
+                basic_center = sqlDistinct(basic_center, ['centerCode']); //对工作中心去重
                 basic_center.forEach(function (item) {
                     item.processCode = ''; //将工序赋值为空
                     item.equipCode = ''; //将设备赋值为空
                 });
                 break;
             case 2:
-                basic_center = $Function.sqlDistinct(basic_center, ['processCode']); //对工序去重
+                basic_center = sqlDistinct(basic_center, ['processCode']); //对工序去重
                 basic_center.forEach(function (item) {
                     item.equipCode = '';
                 });
@@ -115,13 +116,15 @@ function FeedAndReceipt(jobID) {
         });
         sqlStr.substring(0, sqlStr - 1);
         sqlStr1.substring(0, sqlStr1 - 1);
-        var res = $Function.toDataSet($System.BTR, sqlStr);
-        var res1 = $Function.toDataSet($System.BTR, sqlStr1);
+        var res = toDataSet(global.BTR, sqlStr);
+        var res1 = toDataSet(global.BTR, sqlStr1);
         if (!res || !res1) throw '投料/收料计划生成失败！';
-        return true;
+        OutParam.result = true;
     } catch (e) {
-        console.log(e);
-        $Function.tip('error', e);
-        return false;
+        logWrite(dirname, text);
+        OutParam.result = false;
+        OutParam.message = e;
+    } finally {
+        endResponse(RequestID);
     }
 }

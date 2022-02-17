@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-10 15:10:05
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 16:35:28
+ * @LastEditTime: 2022-02-17 15:25:04
  */
 /**
  * @description: 将数据集插入到数据库中
@@ -11,6 +11,7 @@
  * @return {boolean}
  */
 function SqlInsert(dataSet, dataBaseName) {
+    debugger;
     try {
         var field = [];
         for (var key in dataSet[0]) field.push(key);
@@ -31,3 +32,10 @@ function SqlInsert(dataSet, dataBaseName) {
         return false;
     }
 }
+SqlInsert(
+    [
+        { name: 'pzy', age: 12 },
+        { name: 'pzy', age: 12 },
+    ],
+    'WMS'
+);

@@ -2,11 +2,11 @@
  * @Author: EDwin
  * @Date: 2021-12-27 09:40:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 15:24:04
+ * @LastEditTime: 2022-02-17 17:52:17
  */
 /**
  * @description: 质检结果回传，将结果更新到ERP接口表，WMS接口表，MES内部库存表
- * @param {object[]} QCinfo - WMS质检推送信息
+ * @param {object[]} InParam.QCinfo - WMS质检推送信息
  *                                  {
                                         system: [1,2,3] '回传位置 1：ERP，2：WMS，3：MES'
                                         stockcode: '物料编号',
@@ -17,7 +17,8 @@
                                     }
  * @return {boolean} 成功返回true，失败返回false并在控制台打印错误信息
  */
-function QCresultBack(QCinfo) {
+function QCresultBack(InParam, OutParam, RequestID, Token) {
+    var QCinfo = InParam.QCinfo;
     //质检任务表
     var QC_dataBase = ['QC_RealTimeTask'];
     //WMS接口表信息['质检信息推送接口表']
@@ -36,14 +37,14 @@ function QCresultBack(QCinfo) {
                         Batch_No: QCinfo.jobID,
                         SecondBatch_No: QCinfo.jobIDS,
                         Quality_Result: QCinfo.QCresult == 0 ? 20 : QCinfo.QCresult == 1 ? 00 : 10,
-                        Sync_Time: $Function.GetDataTimeFunc(),
+                        Sync_Time: GetDataTimeFunc(),
                     },
                 ];
-                var res = $Function.SqlInsert(WMS_config, WMS_dataBase[0]);
+                var res = SqlInsert(WMS_config, WMS_dataBase[0]);
                 if (!res) throw 'WMS质检信息接口表插入失败！';
             } else {
                 //按大批次推送
-                var QC_RealTimeTask = $Function.toDataSet($System.BTR, `SELECT jobIDS FROM ${QC_dataBase[0]} WHERE jobID = ${QCinfo.jobID}`);
+                var QC_RealTimeTask = toDataSet(global.BTR, `SELECT jobIDS FROM ${QC_dataBase[0]} WHERE jobID = ${QCinfo.jobID}`);
                 if (!WMS_QCinfo) throw 'QC_RealTimeTask质检任务表查询失败！';
                 var WMS_config = {
                     //WMS接口表字段信息及对应的值
@@ -51,7 +52,7 @@ function QCresultBack(QCinfo) {
                     Batch_No: QCinfo.jobID,
                     SecondBatch_No: '',
                     Quality_Result: QCinfo.QCresult == 0 ? 20 : QCinfo.QCresult == 1 ? 00 : 10,
-                    Sync_Time: $Function.GetDataTimeFunc(),
+                    Sync_Time: GetDataTimeFunc(),
                 };
                 //拼接数据集用于插入
                 var arr = [];
@@ -59,7 +60,7 @@ function QCresultBack(QCinfo) {
                     WMS_config.SecondBatch_No = item;
                     arr.push(WMS_config);
                 });
-                var res = $Function.SqlInsert(arr, WMS_dataBase[0]);
+                var res = SqlInsert(arr, WMS_dataBase[0]);
                 if (!res) throw 'WMS质检信息接口表插入失败！';
             }
         }
@@ -91,15 +92,18 @@ function QCresultBack(QCinfo) {
                 sqlStr += `${item} = '${MES_config[item]}' AND `;
             });
             sqlStr = sqlStr.substring(0, sqlStr.length - 4);
-            var res = $Function.toDataSet($System.BTR, sqlStr);
+            var res = toDataSet(global.BTR, sqlStr);
             if (!res) throw 'MES内部表' + MES_dataBase[0] + '更新失败！';
         }
         /*********************************ERP质检结果推送************************************* */
         if (QCinfo.indexOf(1) > -1) {
         }
-        return true;
+        OutParam.result = true;
     } catch (e) {
-        console.log(e);
-        return false;
+        logWrite(dirname, text);
+        OutParam.result = false;
+        OutParam.message = e;
+    } finally {
+        endResponse(RequestID);
     }
 }

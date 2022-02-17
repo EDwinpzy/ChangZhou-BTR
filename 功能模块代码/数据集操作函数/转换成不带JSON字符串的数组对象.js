@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-11 09:46:24
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 11:09:58
+ * @LastEditTime: 2022-02-17 15:37:24
  */
 /**
  * @description: 将带JSON字符串的数据集转换成能直接在数据网格展示的数据集
@@ -11,22 +11,22 @@
  * @return {object[object]} 成功则返回数据集，失败返回false
  */
 function JSON_to_dataSet(dataSet, field) {
+    debugger;
     try {
-        field.forEach(function (item) {
-            var obj = JSON.parse(dataSet[item]);
-            delete dataSet[item];
-            for (var key in obj) {
-                if (dataSet[key] != undefined) throw '键名重复！';
-                dataSet[key] = obj[key];
-            }
-        });
+        for (var i = 0; i < dataSet.length; i++) {
+            field.forEach(function (item) {
+                var obj = JSON.parse(dataSet[i][item]);
+                delete dataSet[i][item];
+                for (var key in obj) {
+                    if (dataSet[i][key] != undefined) throw '键名重复！';
+                    dataSet[i][key] = obj[key];
+                }
+            });
+        }
+
         return dataSet;
     } catch (e) {
         console.log(e);
         return false;
     }
 }
-JSON_to_dataSet([
-    { name: 'pzy', age: 12, sex: 'man' ,obj: },
-    { name: 'cc', age: 1233, sex: 'woman' },
-]);
