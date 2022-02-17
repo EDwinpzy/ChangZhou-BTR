@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-27 09:40:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 15:19:03
+ * @LastEditTime: 2022-02-17 15:22:22
  */
 /**
  * @description: 质检结果回传，将结果更新到ERP接口表，WMS接口表，MES内部库存表
@@ -96,7 +96,8 @@ function QCresultBack(QCinfo) {
             if (!res) throw 'MES内部表' + MES_dataBase[0] + '更新失败！';
         }
         /*********************************ERP质检结果推送************************************* */
-
+        if (QCinfo.indexOf(1) > -1) {
+        }
         return true;
     } catch (e) {
         console.log(e);
