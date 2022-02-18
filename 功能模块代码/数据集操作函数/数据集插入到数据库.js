@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-10 15:10:05
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-18 15:47:59
+ * @LastEditTime: 2022-02-18 17:33:27
  */
 /**
  * @type: KP自定义函数
@@ -12,7 +12,6 @@
  * @return {boolean}
  */
 function SqlInsert(dataSet, dataBaseName) {
-    debugger;
     try {
         var field = [];
         for (var key in dataSet[0]) field.push(key);
@@ -33,10 +32,3 @@ function SqlInsert(dataSet, dataBaseName) {
         return false;
     }
 }
-SqlInsert(
-    [
-        { name: 'pzy', age: 12 },
-        { name: 'pzy', age: 12 },
-    ],
-    'WMS'
-);

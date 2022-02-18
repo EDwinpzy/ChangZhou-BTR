@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-31 11:07:46
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-31 14:02:40
+ * @LastEditTime: 2022-02-18 16:18:01
  */
 /**
  * @type: KP自定义脚本
@@ -48,7 +48,3 @@ function fileDisplay(filePath, keyWord, extname) {
         return false;
     }
 }
-module.exports = {
-    fileDisplay,
-};
-fileDisplay("F:\\steam\\steamapps\\common\\Sid Meier's Civilization VI\\DLC", 'panama', '.xml');

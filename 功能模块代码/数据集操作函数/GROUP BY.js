@@ -1,8 +1,8 @@
 /*
  * @Author: EDwin
  * @Date: 2021-12-30 08:59:35
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2021-12-31 10:42:59
+ * @LastEditors: EDwin
+ * @LastEditTime: 2022-02-18 18:13:28
  */
 /**
  * @type: KP自定义函数
@@ -13,7 +13,6 @@
  * @return {object[]} 数组对象
  */
 function sqlGroupby(dataSet, sumField, groupField) {
-    debugger;
     try {
         var map = {};
         var resData = [];

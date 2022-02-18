@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:56:01
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-31 12:42:30
+ * @LastEditTime: 2022-02-18 19:50:48
  */
 /**
  * @description: 执行数据库操作函数(异步)
@@ -11,6 +11,7 @@
  * @return {object} 返回执行结果对象{errorcode: 0, message: '错误信息', data: [{返回的结果集}]}
  */
 async function DBExecute(config, sqlStr) {
+    debugger;
     //请求调用mssql
     var sql = require('mssql');
     //数据库连接配置信息
@@ -45,6 +46,7 @@ async function DBExecute(config, sqlStr) {
     console.log(data);
 }
 async function sqlExecute(req, sqlStr) {
+    debugger;
     return new Promise(function (resolve, reject) {
         req.query(sqlStr, function (err, recordreset) {
             if (err) {
@@ -55,3 +57,4 @@ async function sqlExecute(req, sqlStr) {
         });
     });
 }
+DBExecute(['127.0.0.1', 'sa', 'Sa123', 'serial_number'], `SELECT * FROM [dbo].[serial_number]`);

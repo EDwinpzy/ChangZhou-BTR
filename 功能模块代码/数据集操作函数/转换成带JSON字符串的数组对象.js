@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-10 16:40:17
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 15:43:28
+ * @LastEditTime: 2022-02-18 17:37:26
  */
 /**
  * @type: KP自定义函数
@@ -12,7 +12,6 @@
  * @return {object[object]} 成功则返回数据集，失败返回false
  */
 function dataSet_to_JSON(dataSet, field) {
-    debugger;
     try {
         for (var i = 0; i < dataSet.length; i++) {
             field.forEach(function (item) {
