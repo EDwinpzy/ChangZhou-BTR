@@ -1,9 +1,14 @@
 /*
- * @description: 轮询WMS_instore_order表，若有新的入库指令，则在前端页面做提示，放在定时器脚本中执行
  * @Author: EDwin
  * @Date: 2022-01-18 13:58:11
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-25 14:10:37
+ * @LastEditTime: 2022-02-18 15:47:02
+ */
+/**
+ * @type: KP周期性脚本
+ * @description: 轮询WMS_instore_order表，若有新的入库指令，则在前端页面做提示，放在定时器脚本中执行
+ * @param {*}
+ * @return {*}
  */
 var dataBase = ['[dbo].[WMS_in_require]'];
 try {

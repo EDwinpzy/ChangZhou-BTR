@@ -5,6 +5,7 @@
  * @LastEditTime: 2022-01-31 14:02:40
  */
 /**
+ * @type: KP自定义脚本
  * @description: 遍历指定路径下的所有文件
  * @param {string} filePath - 指定路径
  * @return {*} 文件路径+文件名+后缀 数组

@@ -1,10 +1,11 @@
 /*
  * @Author: EDwin
  * @Date: 2021-12-30 08:58:57
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2021-12-31 10:54:34
+ * @LastEditors: EDwin
+ * @LastEditTime: 2022-02-18 15:48:38
  */
 /**
+ * @type: KP自定义函数
  * @description: 排序，实现ORDER BY功能
  * @param {object[object]} dataSet - 数据集
  * @param {object[object]} field - 排序字段及规则 [{name: '字段名1', rule: 'ASC'}, {name: '字段名2', rule: 'DESC'}]

@@ -5,6 +5,7 @@
  * @LastEditTime: 2021-12-31 10:42:59
  */
 /**
+ * @type: KP自定义函数
  * @description: 聚合函数，分组统计，实现GROUP BY SUM功能
  * @param {object[object]} dataSet - 数据集
  * @param {object[]} sumField - 需要求和名且保留展示的字段

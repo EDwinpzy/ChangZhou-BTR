@@ -3,9 +3,10 @@
  * @Author: EDwin
  * @Date: 2022-01-18 14:54:01
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-31 12:24:17
+ * @LastEditTime: 2022-02-18 15:45:30
  */
 /**
+ * @type: KC周期性脚本
  * @description: 周期性同步物料信息，每10分钟同步一次，将ERP的表materialMasterData中的数据插入到WMS接口表WMS_infoSync中
  * @param {*}
  * @return {*}

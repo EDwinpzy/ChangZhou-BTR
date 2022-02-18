@@ -2,9 +2,10 @@
  * @Author: EDwin
  * @Date: 2021-12-27 09:40:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 17:52:17
+ * @LastEditTime: 2022-02-18 15:49:18
  */
 /**
+ * @type: KC请求式脚本
  * @description: 质检结果回传，将结果更新到ERP接口表，WMS接口表，MES内部库存表
  * @param {object[]} InParam.QCinfo - WMS质检推送信息
  *                                  {

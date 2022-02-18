@@ -5,6 +5,7 @@
  * @LastEditTime: 2022-02-17 15:56:42
  */
 /**
+ * @type: KP自定义脚本
  * @description: 写入日志信息(同步函数)
  * @param {*}
  * @return {*}

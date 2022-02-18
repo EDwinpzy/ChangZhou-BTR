@@ -2,9 +2,10 @@
  * @Author: EDwin
  * @Date: 2022-01-10 15:10:05
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 15:25:04
+ * @LastEditTime: 2022-02-18 15:47:59
  */
 /**
+ * @type: KP自定义函数
  * @description: 将数据集插入到数据库中
  * @param {object[object]} dataSet - 需要插入的数据集
  * @param {string} dataBaseName - 数据库名称

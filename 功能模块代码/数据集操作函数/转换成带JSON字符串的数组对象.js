@@ -5,6 +5,7 @@
  * @LastEditTime: 2022-02-17 15:43:28
  */
 /**
+ * @type: KP自定义函数
  * @description: 将数据集转换成带私有成员对象JSON字符串的数据集用于直接存入数据库
  * @param {object[object]} dataSet - 需要更新的数据集
  * @param {object[string]} field - JSON字符串字段名 [{field: 'privateObj', key: ['字段名1', '字段名2', ...]}, ...]

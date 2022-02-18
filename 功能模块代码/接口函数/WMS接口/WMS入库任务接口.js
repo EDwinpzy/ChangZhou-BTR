@@ -2,9 +2,10 @@
  * @Author: EDwin
  * @Date: 2022-01-19 16:04:18
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 17:49:38
+ * @LastEditTime: 2022-02-18 15:47:28
  */
 /**
+ * @type: KC请求式脚本
  * @description: 手动生成一条入库任务下发至WMS入库指令接口表中
  * @param {object[object]} InParam.inInfo - 入库信息 [{jobIDS: '小批次号', orderType: '10（正常入库） 20（退料入库）', beginLocation: '开始地址'}, ...]
  * @return {boolean}

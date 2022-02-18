@@ -5,6 +5,7 @@
  * @LastEditTime: 2022-01-18 16:58:15
  */
 /**
+ * @type: KP自定义脚本
  * @description: 创建多级目录（同步函数）以递归的方式
  * @param {string} dirname - 绝对路径
  * @return {boolean} 若成功或已存在则返回true

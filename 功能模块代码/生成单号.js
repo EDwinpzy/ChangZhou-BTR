@@ -2,11 +2,12 @@
  * @Author: EDwin
  * @Date: 2021-12-30 08:57:48
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 17:38:36
+ * @LastEditTime: 2022-02-18 10:32:00
  */
 /**
+ * @type: KP自定义脚本
  * @description: 获取各种表单、任务编号 规则：类型 + 日期 + 流水号
- * @param {number} type - 编号类型 1:工单号 2：原材料质检 3：成品出库单 4：半成品质检 5：XXXXXX 6：成品质检 7: MRB 8：退库单
+ * @param {number} type - 编号类型 1:工单号 2：原材料质检 3：成品出库单 4：半成品质检 5：XXXXXX 6：成品质检 7: MRB 8：退库单 9：成品入库单 10：领料单
  * @return {string} id - 单号
  */
 function getID(type) {

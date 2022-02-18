@@ -1,10 +1,11 @@
 /*
  * @Author: EDwin
  * @Date: 2021-12-30 09:00:22
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2021-12-30 09:00:22
+ * @LastEditors: EDwin
+ * @LastEditTime: 2022-02-18 15:51:48
  */
 /**
+ * @type: KP自定义脚本
  * @description: 生成随机GUID码
  * @return {string} 返回GUID码
  */

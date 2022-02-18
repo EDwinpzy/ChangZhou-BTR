@@ -2,9 +2,10 @@
  * @Author: EDwin
  * @Date: 2021-12-14 10:42:26
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 11:06:02
+ * @LastEditTime: 2022-02-18 15:47:56
  */
 /**
+ * @type: KP自定义函数
  * @description 对数据集进行筛选
  * @param {object} dataSet 数据集
  * @param {object[object]} filter - 筛选条件[{field: '字段名1', value: '字段值1', match: '='}, {field: 字段名2, value: '字段值2,字段值3,字段值4,...', match: 'in'}, ...]，匹配条件可为 =、!=、<、>、<=、>=、in、like（模糊查询），此处条件连接均未AND，若条件连接未OR，则使用两次该函数，将两次执行的结果合并(concat)成一个数据集即可

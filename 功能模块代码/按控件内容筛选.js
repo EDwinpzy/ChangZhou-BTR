@@ -1,10 +1,11 @@
 /*
  * @Author: EDwin
  * @Date: 2021-12-29 17:40:18
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2022-01-11 17:07:29
+ * @LastEditors: EDwin
+ * @LastEditTime: 2022-02-18 15:50:13
  */
 /**
+ * @type: KP自定义脚本
  * @description: 按控件内容筛选函数
  * @param {object[object]} OCX - 控件名称及对应的字段名 [{name: 'Combobox1', field: 'taskID', match: '='}, ...] 匹配条件可为 =、!=、<、>、<=、>=、like（模糊查询）
  *                               若需要对单选框的文本内容进行筛选，则name属性需为 '控件名称_text' 这种形式

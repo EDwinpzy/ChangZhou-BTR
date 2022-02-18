@@ -2,9 +2,10 @@
  * @Author: EDwin
  * @Date: 2021-12-30 08:57:16
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-19 10:17:40
+ * @LastEditTime: 2022-02-18 15:50:50
  */
 /**
+ * @type: KP自定义脚本
  * @description: 执行SQL语句
  * @param {string} dataSource - 数据源名称
  * @param {string} sqlStr - SQL语句
@@ -31,7 +32,7 @@ function toDataSet(dataSource, sqlStr) {
             return true;
         }
     } catch (e) {
-        $Function.logWrite($System.errorLogPath, e);//写入错误日志
+        $Function.logWrite($System.errorLogPath, e); //写入错误日志
         console.log(e);
         $Function.tip('error', e);
         return false;

@@ -5,6 +5,7 @@
  * @LastEditTime: 2022-02-17 15:37:24
  */
 /**
+ * @type: KP自定义函数
  * @description: 将带JSON字符串的数据集转换成能直接在数据网格展示的数据集
  * @param {object[object]} dataSet - 需要更新的数据集
  * @param {object[]} field - JSON字符串字段名 ['私有成员对象字段名1'， ...]

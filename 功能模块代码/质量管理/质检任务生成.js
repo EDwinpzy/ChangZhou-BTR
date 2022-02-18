@@ -2,10 +2,11 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 17:57:32
+ * @LastEditTime: 2022-02-18 15:49:49
  * @FilePath: \负极二期\功能模块代码\质检任务生成.js
  */
 /**
+ * @type: KC请求式脚本
  * @description: 实现生成原材料质检任务，半成品取样任务，半成品质检任务，成品取样任务，成品质检任务函数
  * @param {Number} InParam.taskType - 任务类型 1：原材料质检  3：半成品质检  5：成品质检
  * @param {object[]} InParam.info - 传入的原材料/半成品/成品信息(数组对象)

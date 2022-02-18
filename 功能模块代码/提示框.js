@@ -1,8 +1,15 @@
 /*
  * @Author: EDwin
  * @Date: 2022-01-04 11:27:00
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2022-01-04 11:27:01
+ * @LastEditors: EDwin
+ * @LastEditTime: 2022-02-18 15:51:02
+ */
+/**
+ * @type: KP自定义脚本
+ * @description:
+ * @param {*} type
+ * @param {*} msg
+ * @return {*}
  */
 function tip(type, msg) {
     var msg1, type1;

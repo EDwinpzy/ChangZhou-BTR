@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-29 11:22:16
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-04 11:09:01
+ * @LastEditTime: 2022-02-18 15:50:56
  */
 //初始化表头
 $('#' + id).datagrid({

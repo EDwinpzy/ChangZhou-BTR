@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-02-17 17:59:38
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 17:59:39
+ * @LastEditTime: 2022-02-18 15:49:40
  */
 /*
  * @Author: EDwin
@@ -11,6 +11,7 @@
  * @LastEditTime: 2022-01-19 17:47:11
  */
 /**
+ * @type: KC周期性脚本
  * @description: 轮询数据库表QC_RealTimeTask，将已生成质检结果且未推送的信息推送给ERP、WMS、MES
  * @param {*}
  * @return {*}

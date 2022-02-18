@@ -5,6 +5,7 @@
  * @LastEditTime: 2021-12-31 10:53:28
  */
 /**
+ * @type: KP自定义函数
  * @description: 数据联合，实现inner JOIN功能
  * @param {object[]} dataSetLeft - 左表数据集
  * @param {object[]} dataSetRight - 右表数据集

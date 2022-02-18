@@ -2,9 +2,10 @@
  * @Author: EDwin
  * @Date: 2022-01-19 16:04:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 17:46:49
+ * @LastEditTime: 2022-02-18 15:45:41
  */
 /**
+ * @type: KC请求式脚本
  * @description: 手动生成一条出库任务下发至WMS出库指令接口表中
  * @param {object[object]} InParam.outInfo - 出库信息 [{jobIDS: '小批次号', endLocation: '结束地址'}, ...]
  * @return {boolean}

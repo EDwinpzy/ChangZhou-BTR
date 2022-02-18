@@ -2,9 +2,10 @@
  * @Author: EDwin
  * @Date: 2021-12-30 09:03:49
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 17:40:14
+ * @LastEditTime: 2022-02-18 15:45:12
  */
 /**
+ * @type: KC请求式脚本
  * @description: 投料/收料 计划/实际 批次生成，投料按原材料小批次投，收料按工单（mes大批次收料）
  * @param {object[object]} InParam.jobID - 制令单号/配比单号（工单号,MES成品批次号）
  * @param {number} rule - 投料收料批次生成规则 1：按ERP工作中心生成  2：按工序生成  3：按设备生成

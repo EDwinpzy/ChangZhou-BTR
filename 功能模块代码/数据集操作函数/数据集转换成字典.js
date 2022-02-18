@@ -2,9 +2,10 @@
  * @Author: EDwin
  * @Date: 2021-12-30 08:56:46
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 11:09:08
+ * @LastEditTime: 2022-02-18 15:48:05
  */
 /**
+ * @type: KP自定义函数
  * @description: 将数据集转换成字典MAP
  * @param {object[string]} primaryKey - 主键名数组
  * @param {object[object]} dataSet - 数据集

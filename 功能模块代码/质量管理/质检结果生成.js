@@ -2,9 +2,10 @@
  * @Author: EDwin
  * @Date: 2022-01-12 13:54:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-17 17:56:01
+ * @LastEditTime: 2022-02-18 15:49:56
  */
 /**
+ * @type: KC请求式脚本
  * @description: 根据自动判定标识生成质检结果，在手动输入质检项结果，或接收质检中心传过来的质检项结果后，自动生成质检项结果和质检任务结果。
  * @param {string} InParam.taskId - 质检任务ID
  * @param {object} InParam.QC_testitem_result 质检项检测结果

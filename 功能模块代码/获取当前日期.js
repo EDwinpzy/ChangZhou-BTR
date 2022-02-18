@@ -5,6 +5,7 @@
  * @LastEditTime: 2021-12-30 09:00:05
  */
 /**
+ * @type: KP自定义脚本
  * @description: 获取当前日期函数
  * @return {string} 返回格式为"2021-01-11"
  */
