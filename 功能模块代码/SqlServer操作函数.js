@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:56:01
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-18 19:50:48
+ * @LastEditTime: 2022-02-19 09:26:00
  */
 /**
  * @description: 执行数据库操作函数(异步)
@@ -57,4 +57,5 @@ async function sqlExecute(req, sqlStr) {
         });
     });
 }
-DBExecute(['127.0.0.1', 'sa', 'Sa123', 'serial_number'], `SELECT * FROM [dbo].[serial_number]`);
+DBExecute(['127.0.0.1', 'sa', 'Sa123', 'BTR'], `SELECT * FROM [dbo].[serial_number]`);
+console.log(123);
