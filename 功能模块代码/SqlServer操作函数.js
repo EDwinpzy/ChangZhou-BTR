@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:56:01
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-19 09:26:00
+ * @LastEditTime: 2022-02-19 17:40:42
  */
 /**
  * @description: 执行数据库操作函数(异步)
@@ -10,11 +10,11 @@
  * @param {string} sqlStr - SQL语句
  * @return {object} 返回执行结果对象{errorcode: 0, message: '错误信息', data: [{返回的结果集}]}
  */
-async function DBExecute(config, sqlStr) {
-    debugger;
+async function toDataSet(sqlStr) {
     //请求调用mssql
     var sql = require('mssql');
     //数据库连接配置信息
+    var config = ['127.0.0.1', 'sa', 'Sa123', 'BTR'];
     var DBconfig = {
         server: config[0],
         authentication: {
@@ -42,20 +42,17 @@ async function DBExecute(config, sqlStr) {
     var conn = new sql.ConnectionPool(DBconfig);
     var req = new sql.Request(conn);
     await conn.connect();
-    var data = await sqlExecute(req, sqlStr);
-    console.log(data);
-}
-async function sqlExecute(req, sqlStr) {
-    debugger;
     return new Promise(function (resolve, reject) {
         req.query(sqlStr, function (err, recordreset) {
             if (err) {
-                resolve({ errorCode: 1, message: err });
+                console.log(err);
+                resolve(false);
             } else {
-                resolve(recordreset.recordset === undefined ? { errorCode: 0 } : { errorCode: 0, data: JSON.parse(JSON.stringify(recordreset.recordset)) });
+                resolve(recordreset.recordset === undefined ? true : JSON.parse(JSON.stringify(recordreset.recordset)));
             }
         });
     });
 }
-DBExecute(['127.0.0.1', 'sa', 'Sa123', 'BTR'], `SELECT * FROM [dbo].[serial_number]`);
-console.log(123);
+module.exports = {
+    toDataSet,
+};

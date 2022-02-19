@@ -10,7 +10,7 @@
  * @param {object[object]} InParam.inInfo - 入库信息 [{jobIDS: '小批次号', orderType: '10（正常入库） 20（退料入库）', beginLocation: '开始地址'}, ...]
  * @return {boolean}
  */
-function WMS_outTask(InParam, OutParam, RequestID, Token) {
+function WMS_inTask(InParam, OutParam, RequestID, Token) {
     var inInfo = InParam.inInfo;
     var dataBase = ['[dbo].[WMS_instore_order]', '[dbo].[storage_batch]', '[dbo].[storage_task]', '[dbo].[get_history]'];
     var inOrder = []; //入库指令数组对象
