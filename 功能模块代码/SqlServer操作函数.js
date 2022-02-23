@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:56:01
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-19 17:40:42
+ * @LastEditTime: 2022-02-21 10:40:05
  */
 /**
  * @description: 执行数据库操作函数(异步)
@@ -10,11 +10,11 @@
  * @param {string} sqlStr - SQL语句
  * @return {object} 返回执行结果对象{errorcode: 0, message: '错误信息', data: [{返回的结果集}]}
  */
-async function toDataSet(sqlStr) {
+async function toDataSet(dataSource, sqlStr) {
     //请求调用mssql
     var sql = require('mssql');
     //数据库连接配置信息
-    var config = ['127.0.0.1', 'sa', 'Sa123', 'BTR'];
+    var config = ['127.0.0.1', 'sa', 'Sa123', '服务器数据库'];
     var DBconfig = {
         server: config[0],
         authentication: {

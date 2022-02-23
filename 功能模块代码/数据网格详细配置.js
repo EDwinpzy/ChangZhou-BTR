@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-29 11:22:16
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-18 15:50:56
+ * @LastEditTime: 2022-02-22 09:12:02
  */
 //初始化表头
 $('#' + id).datagrid({
@@ -87,6 +87,13 @@ $('#' + id).datagrid({
     loadFilter: pagerFilter,
     //配置单击事件
     onDblClickCell: onDblClickCell,
+    //行变颜色
+    rowStyler: function (index, row) {
+        switch (row.spotcheck_status) {
+            case '未点检':
+                return 'background-color: #FFFF00';
+        }
+    },
 });
 
 /*******************************更改分页****************************/

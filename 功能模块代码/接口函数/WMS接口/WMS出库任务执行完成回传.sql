@@ -4,22 +4,22 @@
  * @Author: EDwin
  * @Date: 2022-01-20 14:59:11
  * @LastEditors: EDwin
- * @LastEditTime: 2022-01-25 14:24:45
+ * @LastEditTime: 2022-02-22 11:17:11
  */
 creat trigger WMS_outstore_order_update ON WMS_outstore_order
 after
-UPDATE
-    AS BEGIN if (
+    BEGIN IF (
         SELECT
             Handle_Code
         FROM
             inserted
-    ) = '000' BEGIN --更新库存状态
+    ) = '000' --更新库存状态
 UPDATE
     storage_batch
 SET
-    position = 2,
-    inputTime = GETDATE()
+    POSITION = 2,
+    generateFlag = 0,
+    outTime = GETDATE()
 WHERE
     jobIDS IN (
         SELECT
@@ -30,11 +30,12 @@ WHERE
 UPDATE
     storage_task
 SET
-    taskstatus = 1 endtime = GETDATE()
+    taskstatus = 1,
+    endtime = GETDATE()
 WHERE
     taskID IN (
         SELECT
-            UID
+            Order_Code
         FROM
             inserted
     ) --将实时任务插入历史表中
@@ -47,7 +48,7 @@ FROM
 WHERE
     taskID IN (
         SELECT
-            UID
+            Order_Code
         FROM
             inserted
     ) --删除实时任务
@@ -56,7 +57,8 @@ DELETE FROM
 WHERE
     taskID IN (
         SELECT
-            UID
+            Order_Code
         FROM
             inserted
     )
+END
