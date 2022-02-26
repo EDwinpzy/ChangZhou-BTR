@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-02-21 11:34:51
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-23 11:32:52
+ * @LastEditTime: 2022-02-25 14:38:51
  */
 /**
  * @type: KP自定义函数
@@ -15,7 +15,7 @@ function dataFilter(dataSet, filter) {
     try {
         for (var j = 0; j < filter.length; j++) {
             var len = dataSet.length;
-            if (filter[j].value == '全部') {
+            if (filter[j].value == '全部' || filter[j].value == '') {
                 continue;
             } else {
                 switch (filter[j].match) {
@@ -97,20 +97,27 @@ function dataFilter(dataSet, filter) {
  */
 async function SqlInsert(dataSet, dataBaseName) {
     try {
-        var field = [];
-        for (var key in dataSet[0]) field.push(key);
-        var sqlStr = `INSERT INTO ${dataBaseName} (${field.join(',')}) VALUES `;
-        dataSet.forEach(function (item) {
-            var value = [];
-            for (var key in item) {
-                value.push("'" + item[key] + "'");
+        if (dataSet.constructor === Array && dataSet.length > 0) {
+            var field = [];
+            for (var key in dataSet[0]) field.push(key);
+            var sqlStr = `INSERT INTO ${dataBaseName} (${field.join(',')}) VALUES `;
+            dataSet.forEach(function (item) {
+                var value = [];
+                for (var key in item) {
+                    value.push("'" + item[key] + "'");
+                }
+                sqlStr += `(${value.join(',')}),`;
+            });
+            sqlStr = sqlStr.substring(0, sqlStr.length - 1);
+            var res = await toDataSet('$System.BTR', sqlStr);
+            if (res === true) {
+                return true;
+            } else {
+                return false;
             }
-            sqlStr += `(${value.join(',')}),`;
-        });
-        sqlStr = sqlStr.substring(0, sqlStr.length - 1);
-        var res = await toDataSet('$System.BTR', sqlStr);
-        if (!res) throw 'SQL插入失败：' + sqlStr;
-        return true;
+        } else {
+            throw new Error('[SqlInsert] 传入的数据集为空或格式错误！');
+        }
     } catch (e) {
         console.log(e);
         return false;
@@ -207,7 +214,6 @@ function dataSet_to_JSON(dataSet, field) {
  * @return {object[]} 数组对象
  */
 function sqlDistinct(dataSet, field) {
-    debugger;
     var map = {};
     var resData = [];
     for (var i = 0; i < dataSet.length; i++) {
@@ -319,54 +325,65 @@ function sqlInnerjoin(dataSetLeft, dataSetRight, field) {
  * @type: KP自定义函数
  * @description: 数据联合，实现LEFT JOIN功能
  * @param {object[]} dataSetLeft - 左表数据集
- * @param {object[]} dataSetRight - 右表数据集
- * @param {object[]} field - 联合的字段['左表字段', '右表字段'] (ON左右两侧的字段名)
+ * @param {object[]} dataSetRightArr - [ 右表数据集1, 右表数据集2, 右表数据集3, ... ]
+ * @param {object[]} fieldArr - 联合的字段[['左表1字段', '右表1字段'], ['左表2字段', '右表2字段'], ['左表3字段', '右表3字段'], ...] (ON左右两侧的字段名)
  * @return {object[]} 数组对象
  */
-function sqlLeftjoin(dataSetLeft, dataSetRight, field) {
-    //将右表中与左表同名的字段名称后面加个1
-    var leftField = [];
-    var rightField = [];
-    for (var key in dataSetLeft[0]) {
-        leftField.push(key);
-    }
-    for (var key in dataSetRight[0]) {
-        rightField.push(key);
-    }
-    leftField.forEach(function (item) {
-        for (var i = 0; i < rightField; i++) {
-            if (item == rightField[i]) {
-                copyTrans(dataSetRight, [{ key: rightField[i], value: rightField[i] + '1' }]);
-                rightField[i] = rightField[i] + '1';
+function sqlLeftjoin(dataSetLeft, dataSetRightArr, fieldArr) {
+    if (dataSetRightArr.length !== fieldArr.length) throw new Error('[sqlLeftjoin] 数据集数量和联合字段数量不一致！');
+    if (dataSetRightArr != '' && fieldArr != '') {
+        dataSetRight = dataSetRightArr[0];
+        field = fieldArr[0];
+        //将右表中与左表同名的字段名称后面加个1
+        var leftField = [];
+        var rightField = [];
+        for (var key in dataSetLeft[0]) {
+            leftField.push(key);
+        }
+        for (var key in dataSetRight[0]) {
+            rightField.push(key);
+        }
+        var resData = [];
+        outside: dataSetLeft.forEach(function (leftItem) {
+            var flag = 0; //看右表中有没有和左表某一行匹配的行的标志位
+            inside: for (var i = 0; i < dataSetRight.length; i++) {
+                //若左表和右表字段匹配则存入左表数据（ON后面的联合条件），否则存入null
+                if (leftItem[field[0]] == dataSetRight[i][field[1]]) {
+                    flag = 1;
+                    rightField.forEach(function (key) {
+                        //若字段名不重复，则直接赋值，否则字段名+’1‘后再赋值
+                        if (leftItem[key] === undefined) {
+                            leftItem[key] = dataSetRight[i][key];
+                        } else {
+                            leftItem[key + '1'] = dataSetRight[i][key];
+                        }
+                    });
+                    resData.push(leftItem);
+                } else {
+                    continue inside;
+                }
             }
-        }
-    });
-    //将右表的字段名称加入到左表的对象键名中
-    dataSetLeft.forEach(function (item) {
-        for (var i = 0; i < rightField; i++) {
-            item[rightField[i]] = null;
-        }
-    });
-    var resData = [];
-    dataSetLeft.forEach(function (item) {
-        //用于判断是否右表有和左表匹配的对象，若没有需要将左表该对象本身插入结果中
-        var flag = 0;
-        for (var i = 0; i < dataSetRight.length; i++) {
-            //ON后面的联合条件
-            if (item[field[0]] == dataSetRight[i][field[1]]) {
-                flag = 1;
-                //将右表对象中的值赋给左表对象
-                var obj = item;
+            if (flag == 0) {
+                //右表中没有与左表某一行匹配的行，需要键右表中的字段加到左表中并赋值为null
                 rightField.forEach(function (key) {
-                    obj[key] = dataSetRight[i][key];
+                    if (leftItem[key] === undefined) {
+                        leftItem[key] = null;
+                    } else {
+                        leftItem[key + '1'] = null;
+                    }
                 });
-                resData.push(obj);
+                resData.push(leftItem);
             }
-        }
-        flag === 0 ? resData.push(item) : 1;
-    });
-    return resData;
+        });
+        dataSetRightArr.splice(0, 1);
+        fieldArr.splice(0, 1);
+        dataSetLeft = sqlLeftjoin(resData, dataSetRightArr, fieldArr);
+    } else {
+        return dataSetLeft;
+    }
+    return dataSetLeft;
 }
+
 /**
  * @type: KP自定义函数
  * @description: 排序，实现ORDER BY功能
@@ -397,7 +414,6 @@ function sqlOrder(dataSet, field) {
  * @return {*} 文件路径+文件名+后缀 数组
  */
 function fileDisplay(filePath, keyWord, extname, exclude) {
-    debugger;
     try {
         var fs = require('fs');
         var path = require('path');
@@ -590,28 +606,37 @@ function logWrite(dirname, text) {
  */
 async function getID(type) {
     //单号前缀配置数组
-    var TaskIdConfig = ['6#'];
+    var TaskIdConfig = ['6#', 'YLZJ', 'CPCK', 'BCPZJ', 'XXXX', 'CPZJ', 'MRB', 'TKD', 'CPRKD', 'LLD'];
     var dataBaseName = '[dbo].[serial_number]';
     try {
-        var field = 'num' + type; //该类型单号对应的字段名
-        var num; //流水号
-        var sqlStr = `SELECT ${field} FROM ${dataBaseName} WHERE DT = '${GetDataFunc()}'`;
-        var resData = await toDataSet(global.BTR, sqlStr);
-        if (resData.length == 0) {
-            await toDataSet(global.BTR, `INSERT INTO ${dataBaseName} (DT) VALUES ('${GetDataFunc()}')`);
-            num = 1;
-        }
-        num = resData[0][field];
-        //将当日流水号加1
-        var data = await toDataSet(global.BTR, `UPDATE ${dataBaseName} SET num${type} = '${num + 1}' WHERE DT = '${GetDataFunc()}'`);
+        //获取年月日
         var date = new Date();
         var year = date.getFullYear();
         var month = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1;
         var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
+        var field = 'num' + type; //该类型单号对应的字段名
+        var num = 1; //流水号
+        var startTime = year + '-' + month + '-01';
+        var endTime = '';
+        if (parseInt(month) + 1 > 12) {
+            endTime = year + 1 + '-01-01';
+        } else {
+            endTime = year + '-' + (parseInt(month) + 1 < 10 ? '0' + (parseInt(month) + 1) : parseInt(month) + 1) + '-01';
+        }
+        var sqlStr = `SELECT ${field} FROM ${dataBaseName} WHERE DT < '${endTime}' AND DT >= '${startTime}'`;
+        var resData = await toDataSet('BTR', sqlStr);
+        if (resData.length == 0) {
+            await toDataSet('BTR', `INSERT INTO ${dataBaseName} (DT) VALUES ('${GetDataFunc()}')`);
+            num = 1;
+        } else {
+            resData.forEach(function (item) {
+                item[field] > num ? (num = item[field]) : 1;
+            });
+        }
+        //将当日流水号加1
+        var data = await toDataSet('BTR', `UPDATE ${dataBaseName} SET num${type} = '${num + 1}' WHERE DT = '${GetDataFunc()}'`);
         num < 10 ? (num = '0' + num) : 1;
-        return new Promise(function (resolve, reject) {
-            resolve(TaskIdConfig[type - 1] + year + month + num);
-        });
+        return TaskIdConfig[type - 1] + year + month + num;
     } catch (e) {
         console.log(e);
         return false;
@@ -788,7 +813,6 @@ async function toDataSet(dataSource, sqlStr) {
     return new Promise(function (resolve, reject) {
         req.query(sqlStr, function (err, recordreset) {
             if (err) {
-                console.log('SQL执行失败！' + sqlStr);
                 console.log(err);
                 resolve(false);
             } else {

@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-18 13:58:11
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-19 17:20:45
+ * @LastEditTime: 2022-02-24 21:16:43
  */
 /**
  * @type: KP周期性脚本
@@ -10,10 +10,10 @@
  * @param {*}
  * @return {*}
  */
-var dataBase = ['[dbo].[WMS_in_require]'];
+var dataBase = ['[dbo].[WMS_in_require] '];
 try {
     var res = $Function.toDataSet($System.BTR, `SELECT Package_Code FROM ${dataBase[0]}`);
-    if (!res) throw '入库请求表查询失败！';
+    if (!res) throw ' 入库请求表查询失败 ！ ';
     $System.入库请求任务 = JSON.stringify(res);
     return true;
 } catch (e) {

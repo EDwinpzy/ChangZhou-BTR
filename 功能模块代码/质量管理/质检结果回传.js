@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-27 09:40:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-22 20:13:23
+ * @LastEditTime: 2022-02-24 09:03:34
  */
 /**
  * @type: KC请求式脚本
@@ -46,7 +46,7 @@ async function QCresultBack(QCinfo) {
                 if (!res) throw 'WMS质检信息接口表插入失败！';
             } else {
                 //按大批次推送
-                var QC_RealTimeTask = await func.toDataSet(global.BTR, `SELECT jobIDS FROM ${QC_dataBase[0]} WHERE jobID = ${QCinfo.jobID}`);
+                var QC_RealTimeTask = await func.toDataSet('BTR', `SELECT jobIDS FROM ${QC_dataBase[0]} WHERE jobID = ${QCinfo.jobID}`);
                 if (!WMS_QCinfo) throw 'QC_RealTimeTask质检任务表查询失败！';
                 var WMS_config = {
                     //WMS接口表字段信息及对应的值
@@ -94,7 +94,7 @@ async function QCresultBack(QCinfo) {
                 sqlStr += `${item} = '${MES_config[item]}' AND `;
             });
             sqlStr = sqlStr.substring(0, sqlStr.length - 4);
-            var res = await func.toDataSet(global.BTR, sqlStr);
+            var res = await func.toDataSet('BTR', sqlStr);
             if (!res) throw 'MES内部表' + MES_dataBase[0] + '更新失败！';
         }
         /*********************************ERP质检结果推送************************************* */
