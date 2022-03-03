@@ -2,14 +2,14 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-18 15:49:49
+ * @LastEditTime: 2022-03-03 09:22:41
  * @FilePath: \负极二期\功能模块代码\质检任务生成.js
  */
 /**
  * @type: KC请求式脚本
  * @description: 实现生成原材料质检任务，半成品取样任务，半成品质检任务，成品取样任务，成品质检任务函数
- * @param {Number} InParam.taskType - 任务类型 1：原材料质检  3：半成品质检  5：成品质检
- * @param {object[]} InParam.info - 传入的原材料/半成品/成品信息(数组对象)
+ * @param {Number} taskType - 任务类型 1：原材料质检  3：半成品质检  5：成品质检
+ * @param {object[]} info - 传入的原材料/半成品/成品信息(数组对象)
     *                         [{
                                     ERPorder: 'ERP订单号（若为原材料质检则该字段为ERP采购订单号）',
                                     ERPbatch: 'ERP批次号（一个ERP订单号对应多个ERP批次号，ERP批次号和MES批次号/ 制令单号/配比单号/工单号一一对应）（原材料则为ERP原材料大批次，成品则为根据MES大批次项ERP申请的ERP成品批次号）',
@@ -42,9 +42,7 @@
                                 }, ...]    
  * @return 
  */
-function QCtaskGenrate(InParam, OutParam, RequestID, Token) {
-    var taskType = InParam.taskType;
-    var info = InParam.info;
+function QCtaskGenrate(taskType, info) {
     //数据库表完整路径名称(必须包含数据库名称)['质检实时任务表', '质检结果表', '质检项表', '库存批次信息表']
     var dataBase = ['[dbo].[QC_RealTimeTask]', '[dbo].[QC_result]', '[dbo].[QC_testitem]', '[dbo].[storage_batch]'];
     try {
@@ -129,12 +127,9 @@ function QCtaskGenrate(InParam, OutParam, RequestID, Token) {
         });
         var res2 = toDataSet(global.BTR, `UPDATE dataBase[3] SET QCresult = 0 WHERE jobIDS IN ${jobIDS.join(',')}`);
         if (!res2) throw '库存表storage_batch更新失败！';
-        OutParam.result = true;
+        return true;
     } catch (e) {
-        logWrite(dirname, text);
-        OutParam.result = false;
-        OutParam.message = e;
-    } finally {
-        endResponse(RequestID);
+        // logWrite(dirname, text);
+        return false;
     }
 }

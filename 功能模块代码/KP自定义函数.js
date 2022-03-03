@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-02-21 11:34:51
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-25 14:38:51
+ * @LastEditTime: 2022-03-02 16:45:11
  */
 /**
  * @type: KP自定义函数
@@ -13,59 +13,60 @@
  */
 function dataFilter(dataSet, filter) {
     try {
+        var indataSet = dataSet;
         for (var j = 0; j < filter.length; j++) {
-            var len = dataSet.length;
-            if (filter[j].value == '全部' || filter[j].value == '') {
+            var len = indataSet.length;
+            if (filter[j].value == '全部' || filter[j].value === '') {
                 continue;
             } else {
                 switch (filter[j].match) {
                     case '=':
                         for (var i = len - 1; i >= 0; i--) {
-                            if (dataSet[i][filter[j].field] != filter[j].value) {
-                                dataSet.splice(i, 1);
+                            if (indataSet[i][filter[j].field] != filter[j].value) {
+                                indataSet.splice(i, 1);
                             }
                         }
                         continue;
                     case '!=':
                         for (var i = len - 1; i >= 0; i--) {
-                            if (dataSet[i][filter[j].field] == filter[j].value) {
-                                dataSet.splice(i, 1);
+                            if (indataSet[i][filter[j].field] == filter[j].value) {
+                                indataSet.splice(i, 1);
                             }
                         }
                         continue;
                     case '>':
                         for (var i = len - 1; i >= 0; i--) {
-                            if (dataSet[i][filter[j].field] <= filter[j].value) {
-                                dataSet.splice(i, 1);
+                            if (indataSet[i][filter[j].field] <= filter[j].value) {
+                                indataSet.splice(i, 1);
                             }
                         }
                         continue;
                     case '>=':
                         for (var i = len - 1; i >= 0; i--) {
-                            if (dataSet[i][filter[j].field] < filter[j].value) {
-                                dataSet.splice(i, 1);
+                            if (indataSet[i][filter[j].field] < filter[j].value) {
+                                indataSet.splice(i, 1);
                             }
                         }
                         continue;
                     case '<':
                         for (var i = len - 1; i >= 0; i--) {
-                            if (dataSet[i][filter[j].field] >= filter[j].value) {
-                                dataSet.splice(i, 1);
+                            if (indataSet[i][filter[j].field] >= filter[j].value) {
+                                indataSet.splice(i, 1);
                             }
                         }
                         continue;
                     case '<=':
                         for (var i = len - 1; i >= 0; i--) {
-                            if (dataSet[i][filter[j].field] > filter[j].value) {
-                                dataSet.splice(i, 1);
+                            if (indataSet[i][filter[j].field] > filter[j].value) {
+                                indataSet.splice(i, 1);
                             }
                         }
                         continue;
                     case 'like':
                         for (var i = len - 1; i >= 0; i--) {
                             var reg = eval('/' + filter[j].value + '/ig');
-                            if (reg.test(dataSet[i][filter[j].field]) === false) {
-                                dataSet.splice(i, 1);
+                            if (reg.test(indataSet[i][filter[j].field]) === false) {
+                                indataSet.splice(i, 1);
                             }
                         }
                         continue;
@@ -74,15 +75,15 @@ function dataFilter(dataSet, filter) {
                             var value = filter[j].value.split(',');
                             var flag = 0;
                             value.forEach(function (item) {
-                                if (item == dataSet[i][filter[j].field]) flag = 1;
+                                if (item == indataSet[i][filter[j].field]) flag = 1;
                             });
-                            if (flag === 0) dataSet.splice(i, 1);
+                            if (flag === 0) indataSet.splice(i, 1);
                         }
                         continue;
                 }
             }
         }
-        return dataSet;
+        return indataSet;
     } catch (e) {
         console.log(e);
         return false;
@@ -149,31 +150,40 @@ function toMap(primaryKey, dataSet) {
  * @type: KP自定义函数
  * @description: 将带JSON字符串的数据集转换成能直接在数据网格展示的数据集
  * @param {object[object]} dataSet - 需要更新的数据集
- * @param {object[]} field - JSON字符串字段名 ['私有成员对象字段名1'， ...]
+ * @param {object[]} field - JSON字符串字段名 ['私有成员对象字段名1'， ...] (其中私有成员对象字段值格式化之后应该是一个对象而不是数组对象！)
+ * @param {number} mode 0或为空，则传入的是对象  1：传入的私有成员是数据集
  * @return {object[object]} 成功则返回数据集，失败返回false
  */
-function JSON_to_dataSet(dataSet, field) {
-    debugger;
+function JSON_to_dataSet(dataSet, field, mode) {
     try {
-        for (var i = 0; i < dataSet.length; i++) {
+        var indataSet = dataSet;
+
+        for (var i = 0; i < indataSet.length; i++) {
             field.forEach(function (item) {
-                if (dataSet[i][item] == '') {
+                if (indataSet[i][item] === undefined) {
+                    throw new Error('[JSON_to_dataSet]  私有成员对象名' + item + '不存在！');
+                } else if (indataSet[i][item] == '' || indataSet[i][item] == null) {
                     //若私有成员对象字段为空，则直接删除
-                    delete dataSet[i][item];
+                    delete indataSet[i][item];
                 } else {
-                    //判断私有成员对象字段是否为正确的JSON格式字符串
-                    if (!isJSON(dataSet[i][item])) throw 'JSON字符串格式不正确！' + dataSet[i][item];
-                    var obj = JSON.parse(dataSet[i][item]);
-                    delete dataSet[i][item];
-                    for (var key in obj) {
-                        if (dataSet[i][key] != undefined) throw '键名重复！';
-                        dataSet[i][key] = obj[key];
+                    if (mode === undefined || mode == 0) {
+                        //判断私有成员对象字段是否为正确的JSON格式字符串
+                        if (!isJSON(indataSet[i][item])) throw new Error('[JSON_to_dataSet]  第' + i + '个对象JSON字符串格式不正确！' + indataSet[i][item]);
+                        var obj = JSON.parse(indataSet[i][item]);
+                        delete indataSet[i][item];
+                        for (var key in obj) {
+                            if (indataSet[i][key] != undefined) throw new Error('[JSON_to_dataSet]  第' + i + '个对象的' + key + '键名重复！');
+                            indataSet[i][key] = obj[key];
+                        }
+                    } else if (mode == 2) {
+                    } else {
+                        throw new Error('[JSON_to_dataSet]  传入的第三个参数mode不正确！');
                     }
                 }
             });
         }
 
-        return dataSet;
+        return indataSet;
     } catch (e) {
         console.log(e);
         return false;
@@ -188,19 +198,20 @@ function JSON_to_dataSet(dataSet, field) {
  */
 function dataSet_to_JSON(dataSet, field) {
     try {
-        for (var i = 0; i < dataSet.length; i++) {
+        var indataSet = dataSet;
+        for (var i = 0; i < indataSet.length; i++) {
             field.forEach(function (item) {
                 var arrKey = item.key;
                 var obj = {};
                 arrKey.forEach(function (val) {
-                    obj[val] = dataSet[i][val];
-                    delete dataSet[i][val];
+                    obj[val] = indataSet[i][val];
+                    delete indataSet[i][val];
                 });
-                dataSet[i][item.field] = JSON.stringify(obj);
+                indataSet[i][item.field] = JSON.stringify(obj);
             });
         }
 
-        return dataSet;
+        return indataSet;
     } catch (e) {
         console.log(e);
         return false;
@@ -275,68 +286,75 @@ function sqlGroupby(dataSet, sumField, groupField) {
 /**
  * @type: KP自定义函数
  * @description: 数据联合，实现inner JOIN功能
- * @param {object[]} dataSetLeft - 左表数据集
- * @param {object[]} dataSetRight - 右表数据集
- * @param {object[]} field - 联合的字段['左表字段', '右表字段']
- * @return {object[]} 数组对象
- */
-function sqlInnerjoin(dataSetLeft, dataSetRight, field) {
-    //将右表中与左表同名的字段名称后面加个1
-    var leftField = [];
-    var rightField = [];
-    for (var key in dataSetLeft[0]) {
-        leftField.push(key);
-    }
-    for (var key in dataSetRight[0]) {
-        rightField.push(key);
-    }
-    leftField.forEach(function (item) {
-        for (var i = 0; i < rightField; i++) {
-            if (item == rightField[i]) {
-                copyTrans(dataSetRight, [{ key: rightField[i], value: rightField[i] + '1' }]);
-                rightField[i] = rightField[i] + '1';
-            }
-        }
-    });
-    //将右表的字段名称加入到左表的对象键名中
-    dataSetLeft.forEach(function (item) {
-        for (var i = 0; i < rightField; i++) {
-            item[rightField[i]] = null;
-        }
-    });
-    var resData = [];
-    dataSetLeft.forEach(function (item) {
-        for (var i = 0; i < dataSetRight.length; i++) {
-            //ON后面的联合条件
-            if (item[field[0]] == dataSetRight[i][field[1]]) {
-                flag = 1;
-                //将右表对象中的值赋给左表对象
-                var obj = item;
-                rightField.forEach(function (key) {
-                    obj[key] = dataSetRight[i][key];
-                });
-                resData.push(obj);
-            }
-        }
-    });
-    return resData;
-}
-/**
- * @type: KP自定义函数
- * @description: 数据联合，实现LEFT JOIN功能
- * @param {object[]} dataSetLeft - 左表数据集
- * @param {object[]} dataSetRightArr - [ 右表数据集1, 右表数据集2, 右表数据集3, ... ]
+ * @param {object[]} outDataSetLeft - 左表数据集
+ * @param {object[]} outDataSetRightArr - [ 右表数据集1, 右表数据集2, 右表数据集3, ... ]
  * @param {object[]} fieldArr - 联合的字段[['左表1字段', '右表1字段'], ['左表2字段', '右表2字段'], ['左表3字段', '右表3字段'], ...] (ON左右两侧的字段名)
  * @return {object[]} 数组对象
  */
-function sqlLeftjoin(dataSetLeft, dataSetRightArr, fieldArr) {
+function sqlInnerjoin(outDataSetLeft, outDataSetRightArr, fieldArr) {
+    //存中间变量
+    var dataSetLeft = outDataSetLeft;
+    var dataSetRightArr = outDataSetRightArr;
     if (dataSetRightArr.length !== fieldArr.length) throw new Error('[sqlLeftjoin] 数据集数量和联合字段数量不一致！');
     if (dataSetRightArr != '' && fieldArr != '') {
         dataSetRight = dataSetRightArr[0];
         field = fieldArr[0];
-        //将右表中与左表同名的字段名称后面加个1
         var leftField = [];
         var rightField = [];
+        //保存左右数据集的键名
+        for (var key in dataSetLeft[0]) {
+            leftField.push(key);
+        }
+        for (var key in dataSetRight[0]) {
+            rightField.push(key);
+        }
+        var resData = [];
+        outside: dataSetLeft.forEach(function (leftItem) {
+            inside: for (var i = 0; i < dataSetRight.length; i++) {
+                //若左表和右表字段匹配则存入左表数据（ON后面的联合条件），否则存入null
+                if (leftItem[field[0]] == dataSetRight[i][field[1]]) {
+                    flag = 1;
+                    rightField.forEach(function (key) {
+                        //若字段名不重复，则直接赋值，否则字段名+’1‘后再赋值
+                        if (leftItem[key] === undefined) {
+                            leftItem[key] = dataSetRight[i][key];
+                        } else {
+                            leftItem[key + '1'] = dataSetRight[i][key];
+                        }
+                    });
+                    resData.push(leftItem);
+                } else {
+                    continue inside;
+                }
+            }
+        });
+        dataSetRightArr.splice(0, 1);
+        fieldArr.splice(0, 1);
+        dataSetLeft = sqlInnerjoin(resData, dataSetRightArr, fieldArr);
+    } else {
+        return dataSetLeft;
+    }
+    return dataSetLeft;
+}
+/**
+ * @type: KP自定义函数
+ * @description: 数据联合，实现LEFT JOIN功能
+ * @param {object[]} outDataSetLeft - 左表数据集
+ * @param {object[]} outDataSetRightArr - [ 右表数据集1, 右表数据集2, 右表数据集3, ... ]
+ * @param {object[]} fieldArr - 联合的字段[['左表1字段', '右表1字段'], ['左表2字段', '右表2字段'], ['左表3字段', '右表3字段'], ...] (ON左右两侧的字段名)
+ * @return {object[]} 数组对象
+ */
+function sqlLeftjoin(outDataSetLeft, outDataSetRightArr, fieldArr) {
+    //存中间变量
+    var dataSetLeft = outDataSetLeft;
+    var dataSetRightArr = outDataSetRightArr;
+    if (dataSetRightArr.length !== fieldArr.length) throw new Error('[sqlLeftjoin] 数据集数量和联合字段数量不一致！');
+    if (dataSetRightArr != '' && fieldArr != '') {
+        dataSetRight = dataSetRightArr[0];
+        field = fieldArr[0];
+        var leftField = [];
+        var rightField = [];
+        //保存左右数据集的键名
         for (var key in dataSetLeft[0]) {
             leftField.push(key);
         }
@@ -407,9 +425,9 @@ function sqlOrder(dataSet, field) {
 /**
  * @description: 遍历指定路径下的所有文件
  * @param {string} filePath - 指定路径
- * @param {string} keyWord - 指定关键字
- * @param {string} extname - 指定文件扩展名
- * @param {string} exclude - 排除关键字
+ * @param {string} keyWord - 指定文件中的关键字
+ * @param {string} extname - 指定文件扩展名(.xml)
+ * @param {string} exclude - 排除文件中的关键字
  * @param {string}
  * @return {*} 文件路径+文件名+后缀 数组
  */
@@ -431,7 +449,7 @@ function fileDisplay(filePath, keyWord, extname, exclude) {
                     var isDir = stats.isDirectory(); //是文件夹
                     if (isFile) {
                         var suffix = path.extname(filedir); //获取文件后缀名
-                        if ((extname === undefined || suffix == extname) && filedir.indexOf('Data') !== -1) {
+                        if (extname === undefined || suffix == extname) {
                             fs.readFile(filedir, function (err, data) {
                                 if (err) throw err;
                                 data = data.toString();
@@ -601,12 +619,12 @@ function logWrite(dirname, text) {
 /**
 
  * @description: 获取各种表单号、任务编号 规则：类型 + 日期 + 流水号
- * @param {string} type - 编号类型 1:工单号 2：原材料质检 3：成品出库单 4：半成品质检 5：XXXXXX 6：成品质检 7: MRB 8：退库单 9：成品入库单 10：领料单
+ * @param {string} type - 编号类型 1:工单号 2：原材料质检 3：成品出库单 4：半成品质检 5：出库单（移动类型包含成本中心领用，委外...） 6：成品质检 7: MRB 8：退库单 9：成品入库单 10：领料单 11：成本中心退料单
  * @return {string} id - 单号
  */
 async function getID(type) {
     //单号前缀配置数组
-    var TaskIdConfig = ['6#', 'YLZJ', 'CPCK', 'BCPZJ', 'XXXX', 'CPZJ', 'MRB', 'TKD', 'CPRKD', 'LLD'];
+    var TaskIdConfig = ['6#', 'YLZJ', 'CPCK', 'BCPZJ', 'CKD', 'CPZJ', 'MRB', 'TKD', 'CPRKD', 'LLD', 'CBZXTL'];
     var dataBaseName = '[dbo].[serial_number]';
     try {
         //获取年月日
@@ -840,6 +858,23 @@ function isJSON(str) {
         }
     }
 }
+/**
+ * @description: 将字典转换成数据集
+ * @param {object[]} map - 需要转换的字典
+ * @return {object[object]} 返回数据集
+ */
+function toArray(map) {
+    var dataSet = [];
+    for (var key in map) {
+        dataSet.push(item);
+    }
+    return dataSet;
+}
+/**
+ * @description:
+ * @param {*}
+ * @return {*}
+ */
 module.exports = {
     fileDisplay,
     OcxFiltering,
@@ -866,4 +901,5 @@ module.exports = {
     sqlLeftjoin,
     sqlOrder,
     isJSON,
+    toArray,
 };

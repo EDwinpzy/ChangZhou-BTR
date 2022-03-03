@@ -19,7 +19,6 @@ function TaskGenerate(content) {
         sqlStr.substring(0, sqlStr.length - 1);
         var data = {};
         SyncSQLExecute($System.BTR, 1, sqlStr, data);
-
         if (data.errorCode != 0) {
             return {
                 errorCode: 1,
