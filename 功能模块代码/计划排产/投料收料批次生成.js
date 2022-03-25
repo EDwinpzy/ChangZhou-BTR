@@ -2,12 +2,12 @@
  * @Author: EDwin
  * @Date: 2021-12-30 09:03:49
  * @LastEditors: EDwin
- * @LastEditTime: 2022-03-01 15:26:44
+ * @LastEditTime: 2022-03-15 11:10:05
  */
 /**
  * @type: KC请求式脚本
  * @description: 投料/收料 计划/实际 批次生成，投料按原材料小批次投，收料按工单（mes大批次收料）
- * @param {string} jobID - 制令单号/配比单号（工单号,MES成品批次号）
+ * @param {[string]} jobID - 制令单号/配比单号（工单号,MES成品批次号）
  * @param {number} rule - 投料收料批次生成规则 1：按ERP工作中心生成  2：按工序生成  3：按设备生成
  * @return {*}
  */
@@ -65,20 +65,39 @@ async function FeedAndReceipt(jobID, rule) {
                     planYieldRate: '0.9',
                 };
                 putDataSet.push(putObj);
-                //收料
-                var getObj = {
+            }
+            //收料
+            var ByProductName = productOrder_realTime.ByProductName.split('/');
+            var ByProductCode = productOrder_realTime.ByProductCode.split('/');
+            if (ByProductName.length != ByProductCode.length) throw new Error('[FeedAndReceipt]  工单表' + dataBaseConfig[0] + '中副产品名字数量和副产品编号数量不一致！');
+            for (var i = 0; i < ByProductName.length; i++) {
+                //副产品
+                var getObj_byproduct = {
                     ERPorder: productOrder_realTime.ERPorder, //ERP生产订单号
                     ERPbatch: productOrder_realTime.ERPbatch, //ERP批次号
                     jobID: productOrder_realTime.jobID, //工单号
-                    getName: productOrder_realTime.productName == '' ? productOrder_realTime.ByProductName : productOrder_realTime.productName, //收料名称（成品/半成品名称）
-                    getCode: productOrder_realTime.productCode == '' ? productOrder_realTime.ByProductCode : productOrder_realTime.productCode, //收料代码（成品/半成品代码）
+                    getName: productOrder_realTime.ByProductName, //收料名称（副产品名称）
+                    getCode: productOrder_realTime.ByProductCode, //收料代码（副产品代码）
                     planCenter: basic_center[i].centerCode, //计划工作中心
                     planProcess: basic_center[i].processCode, //计划工序
                     planEquip: basic_center[i].equipCode, //计划设备/站点
                     planYieldRate: '0.9',
                 };
-                getDataSet.push(getObj);
+                getDataSet.push(getObj_byproduct);
             }
+            var getObj_product = {
+                //成品或半成品
+                ERPorder: productOrder_realTime.ERPorder, //ERP生产订单号
+                ERPbatch: productOrder_realTime.ERPbatch, //ERP批次号
+                jobID: productOrder_realTime.jobID, //工单号
+                getName: productOrder_realTime.productName, //收料名称（成品/半成品名称）
+                getCode: productOrder_realTime.productCode, //收料代码（成品/半成品代码）
+                planCenter: basic_center[i].centerCode, //计划工作中心
+                planProcess: basic_center[i].processCode, //计划工序
+                planEquip: basic_center[i].equipCode, //计划设备/站点
+                planYieldRate: '0.9',
+            };
+            getDataSet.push(getObj_product);
         }
         var res1 = await func.SqlInsert(putDataSet, 'put_realTime');
         var res2 = await func.SqlInsert(getDataSet, 'get_realTime');

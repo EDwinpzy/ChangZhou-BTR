@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "async": "^3.2.3",
+    "mongodb": "^4.4.1",
+    "mongoose": "^6.2.6",
     "mssql": "^8.0.2",
     "tedious": "^14.3.0"
   }

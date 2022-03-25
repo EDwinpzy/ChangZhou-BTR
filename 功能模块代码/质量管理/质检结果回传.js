@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-27 09:40:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-24 09:03:34
+ * @LastEditTime: 2022-03-09 16:18:26
  */
 /**
  * @type: KC请求式脚本
@@ -18,15 +18,17 @@
                                     }
  * @return {boolean} 成功返回true，失败返回false并在控制台打印错误信息
  */
+var func = require('e:/OneDrive/亚控科技/项目资料/常州贝特瑞项目/负极二期/功能模块代码/KP自定义函数');
 async function QCresultBack(QCinfo) {
     debugger;
-    var func = require('e:/OneDrive/亚控科技/项目资料/常州贝特瑞项目/负极二期/功能模块代码/KP自定义函数');
     //质检任务表
     var QC_dataBase = ['QC_RealTimeTask'];
     //WMS接口表信息['质检信息推送接口表']
     var WMS_dataBase = ['WMS_QCinfo'];
     //MES内部表信息['库存批次信息表']
     var MES_dataBase = ['storage_batch'];
+    //ERP接口表信息['质检特征值表', '质检任务结果']
+    var ERP_dataBase = ['DetectionCharacteristicValue', 'QC_determination'];
     try {
         /*******************************WMS质检信息推送接口*************************** */
         if (QCinfo.system.indexOf(2) > -1) {
@@ -97,9 +99,10 @@ async function QCresultBack(QCinfo) {
             var res = await func.toDataSet('BTR', sqlStr);
             if (!res) throw 'MES内部表' + MES_dataBase[0] + '更新失败！';
         }
-        /*********************************ERP质检结果推送************************************* */
-        // if (QCinfo.indexOf(1) > -1) {
-        // }
+        /*********************************ERP质检任务结果和检测特征值推送************************** */
+        if (QCinfo.indexOf(1) > -1) {
+            
+        }
         return true;
     } catch (e) {
         // logWrite(dirname, text);

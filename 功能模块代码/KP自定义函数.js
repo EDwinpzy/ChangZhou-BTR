@@ -2,17 +2,18 @@
  * @Author: EDwin
  * @Date: 2022-02-21 11:34:51
  * @LastEditors: EDwin
- * @LastEditTime: 2022-03-02 16:45:11
+ * @LastEditTime: 2022-03-11 16:33:42
  */
 /**
  * @type: KP自定义函数
  * @description 对数据集进行筛选
  * @param {object} dataSet 数据集
- * @param {object[object]} filter - 筛选条件[{field: '字段名1', value: '字段值1', match: '='}, {field: 字段名2, value: '字段值2,字段值3,字段值4,...', match: 'in'}, ...]，匹配条件可为 =、!=、<、>、<=、>=、in、like（模糊查询），此处条件连接均未AND，若条件连接未OR，则使用两次该函数，将两次执行的结果合并(concat)成一个数据集即可
+ * @param {object[object]} filter - 筛选条件[{field: '字段名1', value: '字段值1', match: '='}, {field: 字段名2, value: '字段值2,字段值3,字段值4,...', match: 'in'}, ...]，匹配条件可为 =、!=、<、>、<=、>=、in、not in、like（模糊查询），此处条件连接均未AND，若条件连接未OR，则使用两次该函数，将两次执行的结果合并(concat)成一个数据集即可
  * @return {object} 筛选后的数组对象
  */
 function dataFilter(dataSet, filter) {
     try {
+        if (filter.length === undefined) throw new Error('[dataFilter]  传入参数filter类型错误！');
         var indataSet = dataSet;
         for (var j = 0; j < filter.length; j++) {
             var len = indataSet.length;
@@ -151,13 +152,11 @@ function toMap(primaryKey, dataSet) {
  * @description: 将带JSON字符串的数据集转换成能直接在数据网格展示的数据集
  * @param {object[object]} dataSet - 需要更新的数据集
  * @param {object[]} field - JSON字符串字段名 ['私有成员对象字段名1'， ...] (其中私有成员对象字段值格式化之后应该是一个对象而不是数组对象！)
- * @param {number} mode 0或为空，则传入的是对象  1：传入的私有成员是数据集
  * @return {object[object]} 成功则返回数据集，失败返回false
  */
-function JSON_to_dataSet(dataSet, field, mode) {
+function JSON_to_dataSet(dataSet, field) {
     try {
         var indataSet = dataSet;
-
         for (var i = 0; i < indataSet.length; i++) {
             field.forEach(function (item) {
                 if (indataSet[i][item] === undefined) {
@@ -166,18 +165,17 @@ function JSON_to_dataSet(dataSet, field, mode) {
                     //若私有成员对象字段为空，则直接删除
                     delete indataSet[i][item];
                 } else {
-                    if (mode === undefined || mode == 0) {
-                        //判断私有成员对象字段是否为正确的JSON格式字符串
-                        if (!isJSON(indataSet[i][item])) throw new Error('[JSON_to_dataSet]  第' + i + '个对象JSON字符串格式不正确！' + indataSet[i][item]);
+                    //判断私有成员对象字段是否为正确的JSON格式字符串
+                    if (!isJSON(indataSet[i][item])) {
+                        //throw new Error('[JSON_to_dataSet]  第' + i + '个对象JSON字符串格式不正确！' + indataSet[i][item]);
+                        delete indataSet[i][item];
+                    } else {
                         var obj = JSON.parse(indataSet[i][item]);
                         delete indataSet[i][item];
                         for (var key in obj) {
                             if (indataSet[i][key] != undefined) throw new Error('[JSON_to_dataSet]  第' + i + '个对象的' + key + '键名重复！');
                             indataSet[i][key] = obj[key];
                         }
-                    } else if (mode == 2) {
-                    } else {
-                        throw new Error('[JSON_to_dataSet]  传入的第三个参数mode不正确！');
                     }
                 }
             });
@@ -619,7 +617,7 @@ function logWrite(dirname, text) {
 /**
 
  * @description: 获取各种表单号、任务编号 规则：类型 + 日期 + 流水号
- * @param {string} type - 编号类型 1:工单号 2：原材料质检 3：成品出库单 4：半成品质检 5：出库单（移动类型包含成本中心领用，委外...） 6：成品质检 7: MRB 8：退库单 9：成品入库单 10：领料单 11：成本中心退料单
+ * @param {string} type - 编号类型 1:工单号 2：原材料质检 3：成品出库单 4：半成品质检 5：出库单（移动类型包含成本中心领用，委外...） 6：成品质检 7: MRB 8：退库单 9：成品入库单 10：领料单 11：成本中心退料单 12：物权转移单
  * @return {string} id - 单号
  */
 async function getID(type) {
@@ -652,7 +650,7 @@ async function getID(type) {
             });
         }
         //将当日流水号加1
-        var data = await toDataSet('BTR', `UPDATE ${dataBaseName} SET num${type} = '${num + 1}' WHERE DT = '${GetDataFunc()}'`);
+        var data = await toDataSet('BTR', `UPDATE ${dataBaseName} SET num${type} = '${num + 1}' WHERE DT < '${endTime}' AND DT >= '${startTime}'`);
         num < 10 ? (num = '0' + num) : 1;
         return TaskIdConfig[type - 1] + year + month + num;
     } catch (e) {
@@ -871,7 +869,33 @@ function toArray(map) {
     return dataSet;
 }
 /**
- * @description:
+ * @description: 导入函数
+ * @param {object} config - 字段配置对象{ excel字段名1：数据网格field字段名1，...}
+ * @param {string} datagridName - 数据网格名字
+ * @param {string} dataBaseName - 数据库名字（若为空则不存数据库）（按数据网格字段名存数据库）
+ * @param {function} callback - 回调函数
+ * @return {*}
+ */
+function importExcel(config, datagridName, dataBaseName, callback) {
+    try {
+        ImportByExcel(function (data) {
+            if (!data) throw new Error('[importExcel]  导入数据为空！');
+            copyTrans(data, config);
+            $(eval(datagridName).id).datagrid({
+                data: data,
+            });
+            if (dataBaseName != '') {
+                var res = $Function.SqlInsert(data, dataBaseName);
+                if (!res) throw new Error('[importExcel]  导入字段与数据库字段不匹配！存入数据库失败！');
+                callback(res);
+            }
+        });
+    } catch (e) {
+        callback(e);
+    }
+}
+/**
+ * @description: 导入函数
  * @param {*}
  * @return {*}
  */

@@ -2,33 +2,29 @@
  * @Author: EDwin
  * @Date: 2022-01-12 13:54:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-02-18 15:49:56
+ * @LastEditTime: 2022-03-09 20:15:41
  */
 /**
- * @type: KC请求式脚本
  * @description: 根据自动判定标识生成质检结果，在手动输入质检项结果，或接收质检中心传过来的质检项结果后，自动生成质检项结果和质检任务结果。
- * @param {string} InParam.taskId - 质检任务ID
- * @param {object} InParam.QC_testitem_result 质检项检测结果
+ * @param {string} taskId - 质检任务ID
+ * @param {object} QC_testitem_result 质检项检测结果
                 *                      [{
                                             testvalue: '检测值',
                                             result: '质检项检测结果（0为不合格1为合格）',
                                             innerCode: '质检项内码',
                                         }, {}, {}, ...]
- * @param {number} InParam.taskResult - 质检任务结果 0：不合格 1：合格 若省略该参数，则按照自动判定规则生成质检任务结果
+ * @param {number} taskResult - 质检任务结果 0：不合格 1：合格 若省略该参数，则按照自动判定规则生成质检任务结果
+ * @param {number} type - 质检类型 1：IQC 2：IPQC 3：OQC
  * @return {boolean} 成功返回true，失败返回false并在控制台打印错误信息
  */
-function QCresultGenerate(InParam, OutParam, RequestID, Token) {
-    var taskId = InParam.taskId;
-    var QC_testitem_result = InParam.QC_testitem_result;
-    var taskResult = InParam.taskResult;
+function QCresultGenerate(taskId, QC_testitem_result, taskResult, type) {
     //数据库配置信息['质检结果表']
     var dataBase = ['[dbo].[QC_result]', '[dbo].[QC_RealTimeTask]'];
     try {
-        var QC_result = toDataSet(global.BTR, `SELECT * FROM ${dataBase[0]} WHERE taskid = '${taskId}`); //获取当前质检任务结果表信息
-        if (!QC_result) throw '质检任务' + taskId + '不存在！';
-        QC_RealTimeTask = JSON_to_dataSet(QC_RealTimeTask, ['privateTaskObj']);
+        var QC_result = toDataSet(global.BTR, `SELECT * FROM ${dataBase[0]} WHERE taskid = '${taskId}'`); //获取当前质检任务结果表信息
+        if (!QC_result) throw new Error('[QCresultGenerate] 质检任务' + taskId + '不存在！');
         var WL_PDFLAG = QC_result[0].WL_PDFLAG; //物料自动判定标识
-        if (WL_PDFLAG == 0) throw '该质检任务对应的物料不需要自动判定！';
+        if (WL_PDFLAG == 0) throw new Error('[QCresultGenerate] 该质检任务对应的物料不需要自动判定！');
         var QC_testitem_result_map = toMap(['innerCode'], QC_testitem_result);
         var QC_result_map = toMap(['innerCode'], QC_result);
         var QCresult = 1; //若所有必须的质检项都已有检测结果则为0，否则为1
@@ -76,36 +72,37 @@ function QCresultGenerate(InParam, OutParam, RequestID, Token) {
         //判断是否传入质检任务结果
         taskResult == undefined ? 1 : (QCresult = taskResult);
         //质检任务更新语句
-        var task_sqlStr = `UPDATE ${dataBase[1]} SET taskstatus = ${taskstatus}, exeCutor = '系统自动判定', endtime = '${GetDataTimeFunc()}', QCresult = ${QCresult}`;
+        var task_sqlStr = `UPDATE ${dataBase[1]} SET taskstatus = ${taskstatus}, exeCutor = '系统自动判定', endtime = '${GetDataTimeFunc()}', QCresult = ${QCresult} WHERE taskid = '${taskId}'`;
         //质检项结果更新语句
         for (var innerCode in QC_result_map) {
             var testitem_sqlStr = `UPDATE ${dataBase[0]} SET testvalue = '${QC_result_map[innerCode].testvalue}', result = ${QC_result_map[innerCode].result} WHERE taskid = '${taskId}' AND innerCode = '${innerCode}'`;
             var res = toDataSet(global.BTR, testitem_sqlStr);
-            if (!res) throw '质检项' + innerCode + '结果更新失败！';
+            if (!res) throw new Error('[QCresultGenerate] 质检项' + innerCode + '结果更新失败！');
         }
         var res = toDataSet(global.BTR, task_sqlStr);
-        if (!res) throw '质检任务' + taskId + '结果更新失败！';
+        if (!res) throw new Error('[QCresultGenerate] 质检任务' + taskId + '结果更新失败！');
 
         //质检结果回传,若有质检任务结果则执行回传函数
         if (QCresult) {
             //质检回传信息
-            var QC_RealTimeTask = toDataSet(global.BTR, `SELECT * FROM ${dataBase[1]} WHERE taskid = '${taskId}`); //获取当前质检任务表信息
-            if (!QC_RealTimeTask) throw '质检任务信息获取失败！质检结果未推送！';
+            var QC_RealTimeTask = toDataSet(global.BTR, `SELECT * FROM ${dataBase[1]} WHERE taskid = '${taskId}'`); //获取当前质检任务表信息
+            if (!QC_RealTimeTask) throw new Error('[QCresultGenerate] 质检任务信息获取失败！质检结果未推送！');
+            QC_RealTimeTask = JSON_to_dataSet(QC_RealTimeTask, ['privateTaskObj'])[0];
             var QCinfo = {
                 stockcode: QC_RealTimeTask.stockcode == undefined ? QC_RealTimeTask.productCode : QC_RealTimeTask.stockcode,
                 jobID: QC_RealTimeTask.tasktype == 1 ? QC_RealTimeTask.ERPbatch : QC_RealTimeTask.jobID, //若为成品/半成品则是MES大批次，若为原材料则是ERP大批次
                 jobIDS: QC_RealTimeTask.jobIDS,
                 QCresult: QCresult,
+                system: [2, 3],
+                stocktype: type == 1 ? 1 : 2,
             };
             var res = QCresultBack(QCinfo);
-            if (!res) throw '质检结果推送失败！';
+            if (!res) throw new Error('[QCresultGenerate] 质检结果推送失败！');
         }
-        OutParam.result = true;
+        return true;
     } catch (e) {
-        logWrite(dirname, text);
-        OutParam.result = false;
-        OutParam.message = e;
-    } finally {
-        endResponse(RequestID);
+        // logWrite(dirname, text);
+        console.log(e);
+        return false;
     }
 }
