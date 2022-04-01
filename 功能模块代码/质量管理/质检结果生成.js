@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-01-12 13:54:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-03-09 20:15:41
+ * @LastEditTime: 2022-03-28 17:26:39
  */
 /**
  * @description: 根据自动判定标识生成质检结果，在手动输入质检项结果，或接收质检中心传过来的质检项结果后，自动生成质检项结果和质检任务结果。
@@ -93,7 +93,7 @@ function QCresultGenerate(taskId, QC_testitem_result, taskResult, type) {
                 jobID: QC_RealTimeTask.tasktype == 1 ? QC_RealTimeTask.ERPbatch : QC_RealTimeTask.jobID, //若为成品/半成品则是MES大批次，若为原材料则是ERP大批次
                 jobIDS: QC_RealTimeTask.jobIDS,
                 QCresult: QCresult,
-                system: [2, 3],
+                system: type == 1 ? [3] : [2, 3],
                 stocktype: type == 1 ? 1 : 2,
             };
             var res = QCresultBack(QCinfo);

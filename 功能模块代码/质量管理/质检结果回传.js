@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-27 09:40:33
  * @LastEditors: EDwin
- * @LastEditTime: 2022-03-09 16:18:26
+ * @LastEditTime: 2022-03-28 16:23:01
  */
 /**
  * @type: KC请求式脚本
@@ -101,7 +101,6 @@ async function QCresultBack(QCinfo) {
         }
         /*********************************ERP质检任务结果和检测特征值推送************************** */
         if (QCinfo.indexOf(1) > -1) {
-            
         }
         return true;
     } catch (e) {
