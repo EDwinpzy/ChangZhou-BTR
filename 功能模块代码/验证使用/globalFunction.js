@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-04-01 10:07:54
  * @LastEditors: EDwin
- * @LastEditTime: 2022-04-01 15:25:39
+ * @LastEditTime: 2022-05-27 14:46:16
  */
 
 /**
@@ -635,9 +635,21 @@ function logWrite(dirname, text) {
             fs.mkdirSync(dirname);
         }
     }
-    fs.writeFileSync(path, GetDataTimeFunc() + '  操作人：' + $System.userName + '\r\n', { flag: 'a', encoding: 'utf-8', mode: '0666' });
-    fs.writeFileSync(path, text, { flag: 'a', encoding: 'utf-8', mode: '0666' });
-    fs.writeFileSync(path, '\r\n\r\n', { flag: 'a', encoding: 'utf-8', mode: '0666' });
+    fs.writeFileSync(path, GetDataTimeFunc() + '  操作人：' + $System.userName + '\r\n', {
+        flag: 'a',
+        encoding: 'utf-8',
+        mode: '0666'
+    });
+    fs.writeFileSync(path, text, {
+        flag: 'a',
+        encoding: 'utf-8',
+        mode: '0666'
+    });
+    fs.writeFileSync(path, '\r\n\r\n', {
+        flag: 'a',
+        encoding: 'utf-8',
+        mode: '0666'
+    });
 }
 /**
 

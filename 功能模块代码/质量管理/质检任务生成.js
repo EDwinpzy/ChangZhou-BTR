@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2021-12-10 13:39:42
  * @LastEditors: EDwin
- * @LastEditTime: 2022-03-24 14:53:47
+ * @LastEditTime: 2022-05-14 10:21:58
  * @FilePath: /负极二期/功能模块代码/质检任务生成.js
  */
 /**
@@ -55,16 +55,27 @@ async function QCtaskGenrate(taskType, info) {
         var nowData = func.GetDataTimeFunc(); //获取任务生成时间
         var QC_result_insert = [];
         for (var i = 0; i < info.length; i++) {
-            var QCtask = func.dataFilter(QC_RealTimeTask, [
-                { field: 'taskstatus', value: '0,1,2,3', match: 'in' },
-                { field: 'jobIDS', value: info[i].jobIDS, match: '=' },
+            var QCtask = func.dataFilter(QC_RealTimeTask, [{
+                    field: 'taskstatus',
+                    value: '0,1,2,3',
+                    match: 'in'
+                },
+                {
+                    field: 'jobIDS',
+                    value: info[i].jobIDS,
+                    match: '='
+                },
             ]);
             if (!QCtask) continue; // 若已存在该小批次质检任务，则不能重复生成
             var taskId = await func.getID(taskType + 1);
             /*************生成质检结果表QC_result***********/
             var stockCode;
             taskType == 1 ? (stockCode = info[i].privateTaskObj.stockcode) : (stockCode = info[i].privateTaskObj.productCode); //获取物料代码
-            var task_testItem = func.dataFilter(QC_testitem, [{ field: 'WLH', value: stockCode, match: '=' }]);
+            var task_testItem = func.dataFilter(QC_testitem, [{
+                field: 'WLH',
+                value: stockCode,
+                match: '='
+            }]);
             if (task_testItem == false) throw new Error('[QCtaskGenrate]  查询不到物料编号为' + stockCode + '的质检项信息!');
             task_testItem.forEach(function (item) {
                 var obj = Object.assign(new Object(), item);
