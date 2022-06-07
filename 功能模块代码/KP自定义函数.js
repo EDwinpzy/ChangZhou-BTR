@@ -2,7 +2,7 @@
  * @Author: EDwin
  * @Date: 2022-02-21 11:34:51
  * @LastEditors: EDwin
- * @LastEditTime: 2022-05-27 13:43:37
+ * @LastEditTime: 2022-06-03 11:55:03
  */
 /**
  * @type: KP自定义函数
@@ -450,7 +450,8 @@ function fileDisplay(filePath, keyWord, extname, exclude) {
                     var isDir = stats.isDirectory(); //是文件夹
                     if (isFile) {
                         var suffix = path.extname(filedir); //获取文件后缀名
-                        if (extname === undefined || suffix == extname) {
+                        var fileName = path.basename(filedir)
+                        if ((extname == false || suffix == extname) && (exclude == false || fileName.indexOf(exclude) > -1)) {
                             fs.readFile(filedir, function (err, data) {
                                 if (err) throw err;
                                 data = data.toString();
@@ -460,7 +461,7 @@ function fileDisplay(filePath, keyWord, extname, exclude) {
                         }
                     }
                     if (isDir) {
-                        fileDisplay(filedir, keyWord, extname); //递归，如果是文件夹，就继续遍历该文件夹下面的文件
+                        fileDisplay(filedir, keyWord, extname, exclude); //递归，如果是文件夹，就继续遍历该文件夹下面的文件
                     }
                 });
             });
